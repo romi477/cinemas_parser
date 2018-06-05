@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Cinema
+	title = "RIFTER2.1-CZAKALOV.501-RU"
+	UniqueId = "3002D4CF-8699-4946-BB02-9414348D9892"
+>
+	<OwnerPassword Length = "5"/>
+	<UnhideMoviesPassword Length = "6"/>
+	<ProlongationCodes
+		WeekProlongations = "4"
+		MonthProlongations = "36"
+		YearProlongations = "2"
+	>
+		<Code
+			Days = "7"
+			ProlongationCode = "73425499447806281248"
+		/>
+		<Code
+			Days = "7"
+			ProlongationCode = "42014299854829011970"
+		/>
+		<Code
+			Days = "7"
+			ProlongationCode = "46732992080214002826"
+		/>
+		<Code
+			Days = "7"
+			ProlongationCode = "38844718926760113127"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "58503799188397464814"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "42606951101019265629"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "43819475747886522517"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "41457321679722535269"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "38148540486955590429"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "45822300156239925812"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "47633323887625466523"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "40006559669445293484"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "63768813266121277041"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "49734439854338832223"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "67475684167054322850"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "40860317147405964190"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "41207015414241250710"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "60400531829726983496"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "46411604613911026010"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "46855606847957341302"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "39582663763658922996"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "61715298808073790281"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "49278325139184198835"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "48445982938284117219"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "54252532780044886745"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "54993101271135000989"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "69176918076239770064"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "65680528706614592495"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "42287443246689082413"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "44145327639889574974"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "57345720012937209261"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "66021920991765419726"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "50944515708578211813"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "60785938885324626460"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "48161977890857846435"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "54238072057632896667"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "47375569692014277977"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "63829647549653327334"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "61889182142730748968"
+		/>
+		<Code
+			Days = "30"
+			ProlongationCode = "53721404889279813083"
+		/>
+		<Code
+			Days = "365"
+			ProlongationCode = "59837739450358950916"
+		/>
+		<Code
+			Days = "365"
+			ProlongationCode = "45980473284948764282"
+		/>
+	</ProlongationCodes>
+	<IV Value = "0xecf4726efd6579bd256dfcbbde056174"/>
+	<Key Value = "0x8fb7e79402f8f03aeed29a095ff058b2c794e8bd1f5c391e121f15585d02a625"/>
+	<PrivateKey
+		PQ = "0x9460959d226a4c6e328fbe7a3d2a892feaf37603b00cd9f2dbeacabb66c65c6b91c7ac1a297f81e7f6150a2acfab25b786e05c039807daa96fced9a220cd529145d0e3dd7bd711d302667e48fca1c1f44abfae7882af5dcd05578616f781ae5c45722e6a39f9ff58b0c522ca316bf86bcc86d7d343573773c183e7532471bf17fd42c6e09c079106e322e6fa5302355241f41ac3228a1160e1e46b9d317f049dec92acecf9c35e3bea69f1ea41e86f6c12c5240ba562b71aaab0265033d18e35e7daba5caddb85adf5308ba9bd1dfc8d29adc008266071a8b34cf32bea22d9c81075541786ade703e9cd122bd3e15f63189c6f3bea3fc52ef47cf7e41e276afd"
+		E = "0xcfcea4786df48142cb054435acfa4049af89560b4ffa7cd85c76080ef5b39125"
+		dP = "0x2ad47a64faf186a54923de1b94b68a81c6a9fc898cf95afa73294804d4bdaff5d515f7eb9c0f39cc3dd2428a2d29df67329bb3ad87c22f73011d9a34e5ac8e4fd2233570d636b4b716f35e127ad426cb0f9bfb3fde2a2f1fcae13cb4709d78f65a7af360a06eaf8ed61c14d0c9f1c3268f2dfe4ace0f7a1e15bfa0b758e7b6c9"
+		dQ = "0x341e93eb3a05fa87f14850f28c3923d854a8120ea943b006c58f6fec375f002ffc9e8ab66bb7f2eb083d9480fcc46aec7b9d5daa86d3f6b867bd1113863aea872220173d8f43406f1c6296bb4fc9ef0d0dfdb19e359ebcf2b660cf78eff2a702513b5a39ea57cd1e20e62bc89967b9a4ee63603d320d855c7371736a44040bf5"
+		iQP = "0xc4a3ecb12f60db488de4caa0069ca9f40c3d9f136f69aca01ab64aa12e5cf4fca75480798942962cb8567ae3344c8d473932efdf59c514f3880f6b818a89431f5d3dec66876034c801c325bf142f7e11d4b88e1bb677f3aaeabceb298cac17406f8bf9c1a20ebca654869856f9f82b384a7a66a58b9a9334ece8a95287c502bb"
+		P = "0xde6513ab25599d7dfe408e67d43655d4da0f4e41f6f320ac5ae7bb27bbdfaf63da0441c606c328ac9cec2657349ec168e093319a9c514610e0873029792295ea758d6514adaf2678c6ff7fa7cb968c7ae3b622197e5f870b90a94a9a7d49d279ef44aa6ffa003d4d7c40617d11e67f89a05dafb55651a5346340c0b554898395"
+		Q = "0xaacc47606f827c5d4140279394fd23b6e6ac0c86006d8c29658e897d824fa7fcf08e15206eb3258d060a69b82c0fa045209ab177043f26d633a53ed098c386221ca477b63de01128bfcc5b5aca77c3da18ec0b5eabe539703ac5e160a2e9b87f076b0a5605112190c07f203ac229dde3be2bce9532e411a4c1c833b8a53befc9"
+	/>
+	<Owner Value = "70043"/>
+	<Unlock Value = "1366"/>
+	<Activation Key = "55766267422338173755"/>
+</Cinema>
