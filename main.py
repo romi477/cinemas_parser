@@ -3,24 +3,21 @@ import os
 
 # xml_file = os.path.curdir + r'\Cinema.xml'
 tree = ET.ElementTree(file='Cinema.xml')
-owner = tree.find('Owner').attrib['Value']
+# print(tree.getroot())
 root = tree.getroot()
-title = root.attrib['title']
-id = root.attrib['UniqueId']
+print(root.tag)
+print(root.attrib)
 
-def write_tree():
-    write_tree = ET.ElementTree(file='Statistics.key.original')
-    print(write_tree.find('Cinema').attrib['UID'])
+iter_tree = root.getiterator()
+for i in iter_tree:
+    print(f'{i.tag} = {i.text}')
+
+print('*' * 20)
+
+childrens = root.getchildren()
+for j in childrens:
+    # for k in j.getchildren():
+    print(f'{j.tag} = {j.text}')
 
 
 
-
-def main():
-    print(owner)
-    print(title)
-    print(id)
-
-    write_tree()
-
-if __name__ == '__main__':
-    main()
