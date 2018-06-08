@@ -1,5 +1,5 @@
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
+
 
 
 root = ET.Element('StatisticsExportKey')
@@ -12,6 +12,7 @@ tree = ET.ElementTree(root)
 
 # with open('newstat.xml', 'wb') as xfile:
 tree.write("new.xml")
+
 
 
 
