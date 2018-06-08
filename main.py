@@ -7,10 +7,10 @@ def get_xmls():
     xml_lst  = glob.glob(os.path.curdir + r'\PARSE_cinemas\*\*\Cinema.xml')
     for i in xml_lst:
         tree = ET.ElementTree(file=i)
-        owner = tree.find('Owner').attrib['Value']
         root = tree.getroot()
         title = root.attrib['title']
         id = root.attrib['UniqueId']
+        owner = tree.find('Owner').attrib['Value']
         xml_dic = {'title': title, 'id': id, 'owner': owner}
         lst.append(xml_dic)
     return lst
