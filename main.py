@@ -9,9 +9,9 @@ def get_xmls():
         tree = ET.ElementTree(file=i)
         root = tree.getroot()
         title = root.attrib['title']
-        id = root.attrib['UniqueId']
+        uid = root.attrib['UniqueId']
         owner = tree.find('Owner').attrib['Value']
-        xml_dic = {'title': title, 'id': id, 'owner': owner}
+        xml_dic = {'title': title, 'uid': uid, 'owner': owner}
         lst.append(xml_dic)
     return lst
 
@@ -20,7 +20,7 @@ def create_xml(lst):
     for d in lst:
         cinema = ET.Element('Cinema')
         cinema.set('Name', f'{d["title"]}-{d["owner"]}')
-        cinema.set('UID', f'{d["id"]}')
+        cinema.set('UID', f'{d["uid"]}')
         root.append(cinema)
     tree = ET.ElementTree(root)
     with open('Statistics.key.xml', 'wb') as f:
