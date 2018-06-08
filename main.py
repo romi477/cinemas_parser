@@ -1,19 +1,19 @@
 import xml.etree.ElementTree as ET
-from xml.dom import minidom
 import os
+import glob
 
-# xml_file = os.path.curdir + r'\Cinema.xml'
-def get_xml():
+def get_xmls():
     lst = []
-    tree = ET.ElementTree(file='Cinema.xml')
-    owner = tree.find('Owner').attrib['Value']
-    root = tree.getroot()
-    title = root.attrib['title']
-    id = root.attrib['UniqueId']
-    xml_dic = {'title': title, 'id': id, 'owner': owner}
-    lst.append(xml_dic)
+    xml_lst  = glob.glob(os.path.curdir + r'\PARSE_cinemas\*\*\Cinema.xml')
+    for i in xml_lst:
+        tree = ET.ElementTree(file=i)
+        owner = tree.find('Owner').attrib['Value']
+        root = tree.getroot()
+        title = root.attrib['title']
+        id = root.attrib['UniqueId']
+        xml_dic = {'title': title, 'id': id, 'owner': owner}
+        lst.append(xml_dic)
     return lst
-
 
 def create_xml(lst):
     root = ET.Element('StatisticsExportKey')
@@ -23,17 +23,11 @@ def create_xml(lst):
         cinema.set('UID', f'{d["id"]}')
         root.append(cinema)
     tree = ET.ElementTree(root)
-    with open('Stat.xml', 'wb') as f:
+    with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
 
-
-
-
 def main():
-
-    dic = [{'title': 'RIFTER2.1-CZAKALOV.501-RU', 'id': '3002D4CF-8699-4946-BB02-9414348D9892', 'owner': '11111'},
-           {'title': 'RIFTER2.1-CZAKALOV.502-RU', 'id': '23422342-8699-4946-BB02-9414348D9892', 'owner': '22222'}]
-    create_xml(dic)
+    create_xml(get_xmls())
 
 if __name__ == '__main__':
     main()
