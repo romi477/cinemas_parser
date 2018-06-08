@@ -4,7 +4,7 @@ import glob
 
 def get_xmls():
     lst = []
-    xml_lst  = glob.glob(os.path.curdir + r'\PARSE_cinemas\*\*\Cinema.xml')
+    xml_lst  = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
     for i in xml_lst:
         tree = ET.ElementTree(file=i)
         root = tree.getroot()
