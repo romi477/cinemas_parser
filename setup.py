@@ -1,9 +1,9 @@
 from cx_Freeze import setup, Executable
 
-executables = [Executable(r'C:\Users\roma\PycharmProjects\cinemas_parser\getStatData.py')]
+executables = [Executable(r'C:\Users\roma\PycharmProjects\cinemas_parser\createActiveStat.py')]
 
-setup(name='cinemas_parser',
+setup(name='active_stat',
       version='0.0.1',
-      description='my_cinemas_parser',
+      description='active_stat_creator',
       executables=executables
 )

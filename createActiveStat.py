@@ -15,7 +15,7 @@ def get_xmls():
         lst.append(xml_dic)
     return lst
 
-def create_xml(lst):
+def create_stat(lst):
     root = ET.Element('StatisticsExportKey')
     for d in lst:
         cinema = ET.Element('Cinema')
@@ -26,10 +26,21 @@ def create_xml(lst):
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
 
+def create_active():
+    root = ET.Element('Activation')
+    root.set('UID', 'qwerty')
+    root.set('Expiration', '2099/01/01')
+
+    tree = ET.ElementTree(root)
+    with open('Activation.xml.xml', 'wb') as f:
+        tree.write(f)
+
+
 def main():
-    create_xml(get_xmls())
-
+    pass
+    # create_stat(get_xmls())
+    create_active()
 if __name__ == '__main__':
-    main()
 
+    main()
 
