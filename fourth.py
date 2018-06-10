@@ -1,18 +1,20 @@
 import os
 import glob
 
-for i, j, k in os.walk(r'C:\Users\roma\PycharmProjects\cinemas_parser\parse_cinemas'):
-    # print(k)
-    try:
-        print(os.path.abspath(k[0]))
-    except:
-        print('---')
+# for i, j, k in os.walk(r'C:\Users\roma\PycharmProjects\cinemas_parser\parse_cinemas'):
+#     print(k)
+    # try:
+    #     print(os.path.abspath(k[0]))
+    # except:
+    #     print('---')
+#
+# print('*' * 50)
+#
+# for i in os.walk(r'C:\Users\roma\PycharmProjects\cinemas_parser\parse_cinemas'):
+#     print(i)
 
-print('*' * 50)
+xml_lst  = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
 
-for i in os.walk(r'C:\Users\roma\PycharmProjects\cinemas_parser\parse_cinemas'):
-    print(i)
-
-
+print(xml_lst)
 
 

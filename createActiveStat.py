@@ -2,9 +2,8 @@ import xml.etree.ElementTree as ET
 import os
 import glob
 
-def get_xmls():
+def get_xmls(xml_lst):
     lst = []
-    xml_lst  = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
     for i in xml_lst:
         tree = ET.ElementTree(file=i)
         root = tree.getroot()
@@ -26,20 +25,37 @@ def create_stat(lst):
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
 
-def create_active():
+def create_active(lst):
     root = ET.Element('Activation')
-    root.set('UID', 'qwerty')
+    root.set('UID', f'{lst[0]["uid"]}')
     root.set('Expiration', '2099/01/01')
-
     tree = ET.ElementTree(root)
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
 
 
 def main():
-    pass
-    # create_stat(get_xmls())
-    create_active()
+    while True:
+        print("""
+        1. Create stat-data for all xmls from \!PARSE_cinemas
+        2. Create stat-data & activation for xml in current dir
+              """)
+        xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
+        xml_file = glob.glob(os.path.curdir + r'\Cinema.xml')
+        choice = input('your choice: ')
+        if choice == '1':
+            create_stat(get_xmls(xml_folder))
+            print('stat-data successfully created...')
+            break
+        elif choice == '2':
+            create_stat(get_xmls(xml_file))
+            create_active(get_xmls(xml_file))
+            print('stat-data % activation successfully created...')
+            break
+        else:
+            print('incorrect input, try again...')
+    input('press Enter to exit...')
+
 if __name__ == '__main__':
 
     main()
