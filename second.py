@@ -1,19 +1,21 @@
-import xml.etree.ElementTree as ET
+import os
+import glob
+
+xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
+xml_file = glob.glob(os.path.curdir + r'\Cinema.xml')
 
 
+print(xml_folder)
+print(xml_file)
 
-root = ET.Element('StatisticsExportKey')
-attr = ET.Element('Cinema')
-root.append(attr)
-title = ET.SubElement(attr, 'title')
-tree = ET.ElementTree(root)
+# if xml_folder:
+#     print('yes')
+# else:
+#     print('no')
 
+# if os.path.exists(xml_folder)
 
-
-# with open('newstat.xml', 'wb') as xfile:
-tree.write("new.xml")
-
-
+# xml_file = os.path.curdir + r'\Cinema.xml'
 
 
 

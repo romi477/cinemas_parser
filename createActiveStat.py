@@ -37,22 +37,28 @@ def create_active(lst):
 
 
 def main():
+    xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
+    xml_file = glob.glob(os.path.curdir + r'\Cinema.xml')
     while True:
         print("""
         1. Create stat-data for all xmls from \!PARSE_cinemas
         2. Create stat-data & activation for xml in current dir
               """)
-        xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
-        xml_file = glob.glob(os.path.curdir + r'\Cinema.xml')
         choice = input('your choice: ')
         if choice == '1':
-            create_stat(get_xmls(xml_folder))
-            print('stat-data successfully created...')
+            if xml_folder:
+                create_stat(get_xmls(xml_folder))
+                print('stat-data successfully created...')
+            else:
+                print('there are no xmls in \!PARSE_cinemas')
             break
         elif choice == '2':
-            create_stat(get_xmls(xml_file))
-            create_active(get_xmls(xml_file))
-            print('stat-data % activation successfully created...')
+            if xml_file:
+                create_stat(get_xmls(xml_file))
+                create_active(get_xmls(xml_file))
+                print('stat-data % activation successfully created...')
+            else:
+                print('there is no Cinema.xml in current dir')
             break
         else:
             print('incorrect input, try again...')
