@@ -1,6 +1,8 @@
 import xml.etree.ElementTree as ET
 import os
 import glob
+import logging
+
 
 def get_xmls(xml_lst):
     lst = []
@@ -57,6 +59,5 @@ def main():
     input('press Enter to exit...')
 
 if __name__ == '__main__':
-
     main()
 
