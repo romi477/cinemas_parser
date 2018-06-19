@@ -3,6 +3,8 @@ import os
 import glob
 import logging
 
+logging.basicConfig(filename='logfile.log', level=logging.INFO,
+                    format='%(asctime)s:  %(message)s')
 
 def get_xmls(xml_lst):
     lst = []
@@ -22,7 +24,9 @@ def create_stat(lst):
         cinema = ET.Element('Cinema')
         cinema.set('Name', f'{d["title"]}-{d["owner"]}')
         cinema.set('UID', f'{d["uid"]}')
+        logging.info(f'stat-data for {d["title"]}-{d["owner"]} <{d["uid"]}> was created...')
         root.append(cinema)
+    logging.info('--/--')
     tree = ET.ElementTree(root)
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
@@ -31,6 +35,8 @@ def create_active(lst):
     root = ET.Element('Activation')
     root.set('UID', f'{lst[0]["uid"]}')
     root.set('Expiration', '2099/01/01')
+    logging.info(f'activation for <{lst[0]["uid"]}> was created...')
+    logging.info('--/--')
     tree = ET.ElementTree(root)
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
@@ -50,7 +56,7 @@ def main():
                 create_stat(get_xmls(xml_folder))
                 print('stat-data successfully created...')
             else:
-                print('there are no xmls in \!PARSE_cinemas')
+                print('there are no xmls in \!PARSE_cinemas...')
             break
         elif choice == '2':
             if xml_file:
@@ -58,7 +64,7 @@ def main():
                 create_active(get_xmls(xml_file))
                 print('stat-data % activation successfully created...')
             else:
-                print('there is no Cinema.xml in current dir')
+                print('there is no Cinema.xml in current dir...')
             break
         else:
             print('incorrect input, try again...')
