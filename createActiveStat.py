@@ -39,7 +39,7 @@ def create_stat(lst):
         cinema = ET.Element('Cinema')
         cinema.set('Name', f'{d["title"]}-{d["owner"]}')
         cinema.set('UID', f'{d["uid"]}')
-        logger.info(f'stat-data for {d["title"]}-{d["owner"]} <{d["uid"]}> was created...')
+        logger.info(f'stat-data for {d["title"]}-{d["owner"]} <{d["uid"][:8]}...> was created')
         root.append(cinema)
     logger.debug('--/--')
     tree = ET.ElementTree(root)
@@ -50,7 +50,7 @@ def create_active(lst):
     root = ET.Element('Activation')
     root.set('UID', f'{lst[0]["uid"]}')
     root.set('Expiration', '2099/01/01')
-    logger.info(f'activation for <{lst[0]["uid"]}> was created...')
+    logger.info(f'activation for <{lst[0]["uid"]}> was created')
     logger.debug('--/--')
     tree = ET.ElementTree(root)
     with open('Activation.xml.xml', 'wb') as f:
@@ -70,17 +70,17 @@ def main():
             if xml_folder:
                 create_stat(get_xmls(xml_folder))
             else:
-                logger.error('there are no xmls in \!PARSE_cinemas...')
+                logger.error('there are no xmls in \!PARSE_cinemas')
             break
         elif choice == '2':
             if xml_file:
                 create_stat(get_xmls(xml_file))
                 create_active(get_xmls(xml_file))
             else:
-                logger.error('there is no Cinema.xml in current dir...')
+                logger.error('there is no Cinema.xml in current dir')
             break
         else:
-            logger.warning('incorrect input, try again...')
+            logger.warning('incorrect input, try again')
     input('press Enter to exit...')
 
 if __name__ == '__main__':
