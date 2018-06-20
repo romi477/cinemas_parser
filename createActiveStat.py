@@ -7,13 +7,14 @@ import logging
 pth = os.path.curdir + r'\logs'
 if not os.path.exists(pth):
     os.mkdir(os.path.curdir + r'\logs')
+date = datetime.today().strftime("%d-%m-%Y")
 
 logger = logging.getLogger('createActiveStat')
 logger.setLevel(logging.DEBUG)
 
 ch1 = logging.StreamHandler()
 ch1.setLevel(logging.INFO)
-ch2 = logging.FileHandler(filename=os.path.curdir + f'\logs\{datetime.today().strftime("%d-%m-%Y")}.log', delay=False)
+ch2 = logging.FileHandler(filename=os.path.curdir + f'\logs\{date}.log', delay=False)
 ch2.setLevel(logging.DEBUG)
 
 formatter1 = logging.Formatter('%(levelname)s:  %(message)s')
