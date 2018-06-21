@@ -17,8 +17,8 @@ ch1.setLevel(logging.INFO)
 ch2 = logging.FileHandler(filename=os.path.curdir + f'\logs\{date}.log', delay=False)
 ch2.setLevel(logging.DEBUG)
 
-formatter1 = logging.Formatter('%(levelname)s:  %(message)s')
-formatter2 = logging.Formatter('%(asctime)s - %(levelname)s:  %(message)s')
+formatter1 = logging.Formatter('[%(levelname)s] %(message)s')
+formatter2 = logging.Formatter('[%(asctime)s %(levelname)s] %(message)s', '%d/%m/%Y %H:%M:%S')
 
 ch1.setFormatter(formatter1)
 ch2.setFormatter(formatter2)
@@ -56,7 +56,7 @@ def create_active(lst):
     root.set('UID', f'{lst[0]["uid"]}')
     root.set('Expiration', '2099/01/01')
     logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> was created')
-    logger.debug('--/--')
+    logger.debug(f'--/---')
     tree = ET.ElementTree(root)
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
