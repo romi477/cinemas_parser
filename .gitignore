@@ -1,0 +1,7 @@
+.idea/
+build/
+logs/
+!PARSE_cinemas/
+Activation.xml.xml
+Cinema.xml
+Statistics.key.xml

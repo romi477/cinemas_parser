@@ -1,4 +1,16 @@
-from datetime import datetime
+import glob
+import os
+from pathlib import Path
 
-x = datetime.today().strftime("%d-%m-%Y")
-print(x)
+
+# xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*', recursive=False)
+# xml_folder2 = os.walk(r'!PARSE_cinemas')
+#
+# for i in xml_folder2:
+#     print(i)
+# print(xml_folder)
+
+p = Path('!PARSE_cinemas')
+
+for i in p.iterdir():
+    print(i)
