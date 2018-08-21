@@ -1,16 +1,26 @@
-import glob
+import xml.etree.ElementTree as ET
 import os
-from pathlib import Path
+import sys
+import glob
 
 
-# xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*', recursive=False)
-# xml_folder2 = os.walk(r'!PARSE_cinemas')
-#
-# for i in xml_folder2:
-#     print(i)
-# print(xml_folder)
+def get_xmls(xml_lst):
+    print(sys.getsizeof(xml_lst))
+    lst = []
+    for i in xml_lst:
+        if not i.split('\\')[2].startswith('-'):
+            tree = ET.ElementTree(file=i)
+            root = tree.getroot()
+            title = root.attrib['title']
+            uid = root.attrib['UniqueId']
+            owner = tree.find('Owner').attrib['Value']
+            xml_dic = {'title': title, 'uid': uid, 'owner': owner}
+            lst.append(xml_dic)
+        else:
+            continue
+    print(sys.getsizeof(lst))
+    return lst
 
-p = Path('!PARSE_cinemas')
+xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
 
-for i in p.iterdir():
-    print(i)
+print(get_xmls(xml_folder))
