@@ -1,13 +1,21 @@
 from datetime import datetime
+import subprocess
 import xml.etree.ElementTree as ET
 import os
 import glob
 import logging
 
+activCmd = r'Tools\XmlSigner.exe -sign -key Tools\ActivationKey.RSAPrivate -file Activation.xml.xml'
+statCmd = r'Tools\XmlSigner.exe -sign -key Tools\OwnerIDSignKey.RSAPrivate -file Statistics.key.xml'
+compressActiv = r'Tools\Compressor.exe compress Activation.xml.xml Activation.xml -mtf'
+compressStat = r'Tools\Compressor.exe compress Statistics.key.xml Statistics.key -mtf'
+
 date = datetime.today()
-pth = os.path.curdir + f'\logs\{date.strftime("%m-%Y")}'
+if not os.path.exists('logs'):
+    os.mkdir('logs')
+pth = f'logs\{date.strftime("%m-%Y")}'
 if not os.path.exists(pth):
-    os.mkdir(os.path.curdir + f'\logs\{date.strftime("%m-%Y")}')
+    os.mkdir(pth)
 
 logger = logging.getLogger('createActiveStat')
 logger.setLevel(logging.DEBUG)
@@ -71,6 +79,18 @@ def create_active(lst):
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
 
+def sign_compress(cmd, compress):
+    sign = subprocess.run(cmd, shell=True)
+    if sign.returncode == 0:
+        logger.info(f'{cmd} - OK')
+        code = subprocess.run(compress)
+        if code.returncode == 0:
+            logger.info(f'{compress} - OK')
+        else:
+            logger.info(f'{compress} - FAIL')
+    else:
+        logger.info(f'{cmd} - FAIL')
+
 
 def main():
     logger.debug('-- beginning of log --')
@@ -83,24 +103,28 @@ def main():
             logger.debug(f"{file} was't found" )
             pass
 
-    xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
-    xml_file = glob.glob(os.path.curdir + r'\Cinema.xml')
+    xml_folder = glob.glob(r'!Cinemas\*\*\Cinema.xml')
+    xml_file = glob.glob(r'Cinema.xml')
+
     while True:
         print("""
-        1. Create stat-data for all xmls in <!PARSE_cinemas>
+        1. Create stat-data for all xmls in <!Cinemas>
         2. Create stat-data & activation for 'Cinema.xml' in current dir
               """)
         choice = input('your choice: ')
         if choice == '1':
             if xml_folder:
                 create_stat(get_xmls(xml_folder))
+                sign_compress(statCmd, compressStat)
             else:
-                logger.error('there are not xmls in <!PARSE_cinemas>')
+                logger.error('there are not xmls in <!Cinemas>')
             break
         elif choice == '2':
             if xml_file:
                 create_stat(get_xmls(xml_file))
+                sign_compress(statCmd, compressStat)
                 create_active(get_xmls(xml_file))
+                sign_compress(activCmd, compressActiv)
             else:
                 logger.error('there is not Cinema.xml in current dir')
             break
@@ -108,7 +132,7 @@ def main():
             logger.warning('incorrect input, try again')
     input('press <Enter> to exit...')
     logger.debug('-- end of log --')
-    logger.debug('--/--')
+    logger.debug('     ------     ')
 
 if __name__ == '__main__':
     main()

@@ -1,26 +1,20 @@
-import xml.etree.ElementTree as ET
-import os
-import sys
-import glob
+import subprocess
 
 
-def get_xmls(xml_lst):
-    print(sys.getsizeof(xml_lst))
-    lst = []
-    for i in xml_lst:
-        if not i.split('\\')[2].startswith('-'):
-            tree = ET.ElementTree(file=i)
-            root = tree.getroot()
-            title = root.attrib['title']
-            uid = root.attrib['UniqueId']
-            owner = tree.find('Owner').attrib['Value']
-            xml_dic = {'title': title, 'uid': uid, 'owner': owner}
-            lst.append(xml_dic)
-        else:
-            continue
-    print(sys.getsizeof(lst))
-    return lst
+activCmd = r'Tools\XmlSigner.exe -sign -key Tools\ActivationKey.RSAPrivate -file Activation.xml.xml'
+statCmd = r'Tools\XmlSigner.exe -sign -key Tools\OwnerIDSignKey.RSAPrivate -file Statistics.key.xml'
+compressActiv = r'Tools\Compressor.exe compress Activation.xml.xml Activation.xml -mtf'
+compressStat = r'Tools\Compressor.exe compress Statistics.key.xml Statistics.key -mtf'
 
-xml_folder = glob.glob(os.path.curdir + r'\!PARSE_cinemas\*\*\Cinema.xml')
 
-print(get_xmls(xml_folder))
+def sign_compress(cmd, compress):
+    sign = subprocess.run(cmd, shell=True)
+    if sign.returncode == 0:
+        code = subprocess.run(compress)
+        if code.returncode == 0: print('function ok')
+        else: print('compress fail')
+    else: print('sign fail')
+
+
+sign_compress(activCmd, compressActiv)
+sign_compress(statCmd, compressStat)

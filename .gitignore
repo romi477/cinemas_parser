@@ -2,6 +2,7 @@
 build/
 logs/
 /!PARSE_cinemas/
+Tools/
 Activation.xml.xml
 Cinema.xml
 Statistics.key.xml
