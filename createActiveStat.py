@@ -83,7 +83,7 @@ def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=True)
     if sign.returncode == 0:
         logger.info(f'{cmd} - OK')
-        code = subprocess.run(compress)
+        code = subprocess.run(compress, shell=True)
         if code.returncode == 0:
             logger.info(f'{compress} - OK')
         else:
