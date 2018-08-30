@@ -46,7 +46,7 @@ def get_xmls(xml_lst):
     lstExclude = []
     for i in xml_lst:
         try:
-            nameDir = i.split('\\')[2]
+            nameDir = i.split('\\')[1]
             if not nameDir.startswith('-'):
                 lst.append(getLst_i(i))
             else:
@@ -59,16 +59,19 @@ def get_xmls(xml_lst):
     return lst
 
 def create_stat(lst):
-    root = ET.Element('StatisticsExportKey')
-    for d in lst:
-        cinema = ET.Element('Cinema')
-        cinema.set('Name', f'{d["title"]}-{d["owner"]}')
-        cinema.set('UID', f'{d["uid"]}')
-        logger.info(f'Statistics.key.xml for {d["title"]} <{d["uid"]}> was created')
-        root.append(cinema)
-    tree = ET.ElementTree(root)
-    with open('Statistics.key.xml', 'wb') as f:
-        tree.write(f)
+    if lst:
+        root = ET.Element('StatisticsExportKey')
+        for d in lst:
+            cinema = ET.Element('Cinema')
+            cinema.set('Name', f'{d["title"]}-{d["owner"]}')
+            cinema.set('UID', f'{d["uid"]}')
+            logger.info(f'Statistics.key.xml for {d["title"]} <{d["uid"]}> was created')
+            root.append(cinema)
+        tree = ET.ElementTree(root)
+        with open('Statistics.key.xml', 'wb') as f:
+            tree.write(f)
+    else:
+        logger.warning('all xmls in <!Cinemas> were skipped')
 
 def create_active(lst, activDate):
         formatDate = f'20{activDate[4:]}/{activDate[2:4]}/{activDate[:2]}'
@@ -79,7 +82,6 @@ def create_active(lst, activDate):
         tree = ET.ElementTree(root)
         with open('Activation.xml.xml', 'wb') as f:
             tree.write(f)
-
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=True)
@@ -116,31 +118,27 @@ def main():
             if xml_folder:
                 create_stat(get_xmls(xml_folder))
                 sign_compress(statCmd, compressStat)
-            else:
-                logger.error('there are not xmls in <!Cinemas>')
-            break
+                break
+            logger.error('there are not xmls in <!Cinemas>')
 
         elif choice == '2':
             xml_file = glob.glob(r'Cinema.xml')
             activDate = input('enter activation date: ')
+            if not xml_file:
+                logger.error('there is not Cinema.xml in current dir')
+                break
 
             if len(activDate) == 6:
-                if xml_file:
-                    create_stat(get_xmls(xml_file))
-                    sign_compress(statCmd, compressStat)
-                    create_active(get_xmls(xml_file), activDate)
-                    sign_compress(activCmd, compressActiv)
-                else:
-                    logger.error('there is not Cinema.xml in current dir')
+                create_stat(get_xmls(xml_file))
+                sign_compress(statCmd, compressStat)
+                create_active(get_xmls(xml_file), activDate)
+                sign_compress(activCmd, compressActiv)
                 break
 
             elif not activDate:
                 logger.info('date of activation was skipped')
-                if xml_file:
-                    create_stat(get_xmls(xml_file))
-                    sign_compress(statCmd, compressStat)
-                else:
-                    logger.error('there is not Cinema.xml in current dir')
+                create_stat(get_xmls(xml_file))
+                sign_compress(statCmd, compressStat)
                 break
 
             elif len(activDate) != 6:
