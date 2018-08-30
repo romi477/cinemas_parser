@@ -70,14 +70,16 @@ def create_stat(lst):
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
 
-def create_active(lst):
-    root = ET.Element('Activation')
-    root.set('UID', f'{lst[0]["uid"]}')
-    root.set('Expiration', '2099/01/01')
-    logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> was created')
-    tree = ET.ElementTree(root)
-    with open('Activation.xml.xml', 'wb') as f:
-        tree.write(f)
+def create_active(lst, activDate):
+        formatDate = f'20{activDate[4:]}/{activDate[2:4]}/{activDate[:2]}'
+        root = ET.Element('Activation')
+        root.set('UID', f'{lst[0]["uid"]}')
+        root.set('Expiration', formatDate)
+        logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> on <{activDate}> was created')
+        tree = ET.ElementTree(root)
+        with open('Activation.xml.xml', 'wb') as f:
+            tree.write(f)
+
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=True)
@@ -93,7 +95,7 @@ def sign_compress(cmd, compress):
 
 
 def main():
-    logger.debug('-- beginning of log --')
+    logger.debug('-- Beginning of log --')
     filesForDelete = ['Activation.xml.xml', 'Activation.xml', 'Statistics.key.xml', 'Statistics.key']
     for file in filesForDelete:
         try:
@@ -120,10 +122,15 @@ def main():
                 logger.error('there are not xmls in <!Cinemas>')
             break
         elif choice == '2':
+            activDate = input('enter activation date: ')
+            if len(activDate) != 6:
+                logger.warning('enter activation date as <%d%m%y>, for example: 010199')
+                print()
+                continue
             if xml_file:
                 create_stat(get_xmls(xml_file))
                 sign_compress(statCmd, compressStat)
-                create_active(get_xmls(xml_file))
+                create_active(get_xmls(xml_file), activDate)
                 sign_compress(activCmd, compressActiv)
             else:
                 logger.error('there is not Cinema.xml in current dir')
@@ -132,7 +139,7 @@ def main():
             logger.warning('incorrect input, try again')
     input('press <Enter> to exit...')
     logger.debug('-- end of log --')
-    logger.debug('     ------     ')
+    logger.debug('     ......     ')
 
 if __name__ == '__main__':
     main()
