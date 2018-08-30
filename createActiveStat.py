@@ -105,9 +105,6 @@ def main():
             logger.debug(f"{file} was't found" )
             pass
 
-    xml_folder = glob.glob(r'!Cinemas\*\*\Cinema.xml')
-    xml_file = glob.glob(r'Cinema.xml')
-
     while True:
         print("""
         1. Create stat-data for all xmls in <!Cinemas>
@@ -115,28 +112,43 @@ def main():
               """)
         choice = input('your choice: ')
         if choice == '1':
+            xml_folder = glob.glob(r'!Cinemas\*\*\Cinema.xml')
             if xml_folder:
                 create_stat(get_xmls(xml_folder))
                 sign_compress(statCmd, compressStat)
             else:
                 logger.error('there are not xmls in <!Cinemas>')
             break
+
         elif choice == '2':
+            xml_file = glob.glob(r'Cinema.xml')
             activDate = input('enter activation date: ')
-            if len(activDate) != 6:
+
+            if len(activDate) == 6:
+                if xml_file:
+                    create_stat(get_xmls(xml_file))
+                    sign_compress(statCmd, compressStat)
+                    create_active(get_xmls(xml_file), activDate)
+                    sign_compress(activCmd, compressActiv)
+                else:
+                    logger.error('there is not Cinema.xml in current dir')
+                break
+
+            elif not activDate:
+                logger.info('date of activation was skipped')
+                if xml_file:
+                    create_stat(get_xmls(xml_file))
+                    sign_compress(statCmd, compressStat)
+                else:
+                    logger.error('there is not Cinema.xml in current dir')
+                break
+
+            elif len(activDate) != 6:
                 logger.warning('enter activation date as <%d%m%y>, for example: 010199')
-                print()
-                continue
-            if xml_file:
-                create_stat(get_xmls(xml_file))
-                sign_compress(statCmd, compressStat)
-                create_active(get_xmls(xml_file), activDate)
-                sign_compress(activCmd, compressActiv)
-            else:
-                logger.error('there is not Cinema.xml in current dir')
-            break
+
         else:
             logger.warning('incorrect input, try again')
+
     input('press <Enter> to exit...')
     logger.debug('-- end of log --')
     logger.debug('     ......     ')
