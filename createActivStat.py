@@ -1,8 +1,9 @@
-from datetime import datetime
 import subprocess
 import xml.etree.ElementTree as ET
 import os
 import glob
+from datetime import datetime
+from re import fullmatch
 import logging
 
 activCmd = r'Tools\XmlSigner.exe -sign -key Tools\ActivationKey.RSAPrivate -file Activation.xml.xml'
@@ -78,7 +79,7 @@ def create_active(lst, activDate):
         root = ET.Element('Activation')
         root.set('UID', f'{lst[0]["uid"]}')
         root.set('Expiration', formatDate)
-        logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> on <{activDate}> was created')
+        logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> in <{activDate}> was created')
         tree = ET.ElementTree(root)
         with open('Activation.xml.xml', 'wb') as f:
             tree.write(f)
@@ -122,24 +123,28 @@ def main():
             logger.error('there are not xmls in <!Cinemas>')
         elif choice == '2':
             xml_file = glob.glob(r'Cinema.xml')
-            activDate = input('enter activation date: ')
-            if not xml_file:
-                logger.error('there is not Cinema.xml in current dir')
-                break
-            if len(activDate) == 6:
-                create_stat(get_xmls(xml_file))
-                sign_compress(statCmd, compressStat)
-                create_active(get_xmls(xml_file), activDate)
-                sign_compress(activCmd, compressActiv)
-                break
-            elif not activDate:
-                logger.warning('date of activation was skipped')
-                create_stat(get_xmls(xml_file))
-                sign_compress(statCmd, compressStat)
-                break
+            while True:
+                activDate = input('enter activation date: ')
+                if not xml_file:
+                    logger.error('there is not Cinema.xml in current dir')
+                    break
+                if fullmatch(r'\d\d\d\d\d\d', activDate):
+                    create_stat(get_xmls(xml_file))
+                    sign_compress(statCmd, compressStat)
+                    create_active(get_xmls(xml_file), activDate)
+                    sign_compress(activCmd, compressActiv)
+                    break
+                elif not activDate:
+                    logger.warning('date of activation was skipped')
+                    create_stat(get_xmls(xml_file))
+                    sign_compress(statCmd, compressStat)
+                    break
 
-            elif len(activDate) != 6:
-                logger.warning('enter activation date as <%d%m%y>, for example: 010199')
+                elif not fullmatch(r'\d\d\d\d\d\d', activDate):
+                    logger.warning('enter activation date as <%d%m%y>, for example: 010199\n'
+                          '          or press <Enter> to skip this step')
+                    print('   ---   ')
+            break
         else:
             logger.warning('incorrect input, try again')
 
