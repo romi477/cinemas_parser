@@ -52,7 +52,7 @@ def get_xmls(xml_lst):
             else:
                 if nameDir not in lstExclude:
                     lstExclude.append(nameDir)
-                    logger.debug(f'directory {nameDir[1:]} was skipped')
+                    logger.warning(f'directory {nameDir[1:]} was skipped')
                 continue
         except IndexError:
             lst.append(getLst_i(i))
@@ -84,16 +84,16 @@ def create_active(lst, activDate):
             tree.write(f)
 
 def sign_compress(cmd, compress):
-    sign = subprocess.run(cmd, shell=True)
+    sign = subprocess.run(cmd, shell=False)
     if sign.returncode == 0:
         logger.info(f'{cmd} - OK')
-        code = subprocess.run(compress, shell=True)
+        code = subprocess.run(compress, shell=False)
         if code.returncode == 0:
             logger.info(f'{compress} - OK')
         else:
-            logger.info(f'{compress} - FAIL')
+            logger.warning(f'{compress} - FAIL')
     else:
-        logger.info(f'{cmd} - FAIL')
+        logger.warning(f'{cmd} - FAIL')
 
 
 def main():
@@ -120,30 +120,26 @@ def main():
                 sign_compress(statCmd, compressStat)
                 break
             logger.error('there are not xmls in <!Cinemas>')
-
         elif choice == '2':
             xml_file = glob.glob(r'Cinema.xml')
             activDate = input('enter activation date: ')
             if not xml_file:
                 logger.error('there is not Cinema.xml in current dir')
                 break
-
             if len(activDate) == 6:
                 create_stat(get_xmls(xml_file))
                 sign_compress(statCmd, compressStat)
                 create_active(get_xmls(xml_file), activDate)
                 sign_compress(activCmd, compressActiv)
                 break
-
             elif not activDate:
-                logger.info('date of activation was skipped')
+                logger.warning('date of activation was skipped')
                 create_stat(get_xmls(xml_file))
                 sign_compress(statCmd, compressStat)
                 break
 
             elif len(activDate) != 6:
                 logger.warning('enter activation date as <%d%m%y>, for example: 010199')
-
         else:
             logger.warning('incorrect input, try again')
 

@@ -1,6 +1,9 @@
 from cx_Freeze import setup, Executable
 
-executables = [Executable(r'C:\Users\roma\PycharmProjects\cinemas_parser\second.py')]
+executables = [Executable(r'C:\Users\roma\PycharmProjects\cinemas_parser\createActivStat.py',
+                          icon='py.ico'
+                          )
+               ]
 
 options = {
     'build_exe': {
