@@ -1,6 +1,6 @@
 from cx_Freeze import setup, Executable
 
-executables = [Executable(r'C:\Users\roma\PycharmProjects\cinemas_parser\createActivStat.py',
+executables = [Executable(r'c:\Users\medvet\PycharmProjects\cinemas_parser\createActivStat.py',
                           icon='py.ico'
                           )
                ]

@@ -18,7 +18,7 @@ pth = f'logs\{date.strftime("%m-%Y")}'
 if not os.path.exists(pth):
     os.mkdir(pth)
 
-logger = logging.getLogger('createActiveStat')
+logger = logging.getLogger('createActivStat')
 logger.setLevel(logging.DEBUG)
 
 ch1 = logging.StreamHandler()
@@ -53,7 +53,7 @@ def get_xmls(xml_lst):
             else:
                 if nameDir not in lstExclude:
                     lstExclude.append(nameDir)
-                    logger.warning(f'directory {nameDir[1:]} was skipped')
+                    logger.warning(f'Directory {nameDir[1:]} was skipped')
                 continue
         except IndexError:
             lst.append(getLst_i(i))
@@ -72,7 +72,7 @@ def create_stat(lst):
         with open('Statistics.key.xml', 'wb') as f:
             tree.write(f)
     else:
-        logger.warning('all xmls in <!Cinemas> were skipped')
+        logger.warning('All xmls in <!Cinemas> were skipped')
 
 def create_active(lst, activDate):
         formatDate = f'20{activDate[4:]}/{activDate[2:4]}/{activDate[:2]}'
@@ -83,6 +83,7 @@ def create_active(lst, activDate):
         tree = ET.ElementTree(root)
         with open('Activation.xml.xml', 'wb') as f:
             tree.write(f)
+        logger.info(f'<Date of activation> --> {activDate}')
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=False)
@@ -98,7 +99,7 @@ def sign_compress(cmd, compress):
 
 
 def main():
-    logger.debug('-- Beginning of log --')
+    logger.debug('--- Log started ---')
     filesForDelete = ['Activation.xml.xml', 'Activation.xml', 'Statistics.key.xml', 'Statistics.key']
     for file in filesForDelete:
         try:
@@ -120,13 +121,13 @@ def main():
                 create_stat(get_xmls(xml_folder))
                 sign_compress(statCmd, compressStat)
                 break
-            logger.error('there are not xmls in <!Cinemas>')
+            logger.error('There are no xmls in <!Cinemas>')
         elif choice == '2':
             xml_file = glob.glob(r'Cinema.xml')
             while True:
                 activDate = input('enter activation date: ')
                 if not xml_file:
-                    logger.error('there is not Cinema.xml in current dir')
+                    logger.error('There is no Cinema.xml in current dir')
                     break
                 if fullmatch(r'\d\d\d\d\d\d', activDate):
                     create_stat(get_xmls(xml_file))
@@ -135,22 +136,21 @@ def main():
                     sign_compress(activCmd, compressActiv)
                     break
                 elif not activDate:
-                    logger.warning('date of activation was skipped')
                     create_stat(get_xmls(xml_file))
                     sign_compress(statCmd, compressStat)
+                    create_active(get_xmls(xml_file), '010199')
+                    sign_compress(activCmd, compressActiv)
                     break
-
                 elif not fullmatch(r'\d\d\d\d\d\d', activDate):
-                    logger.warning('enter activation date as <%d%m%y>, for example: 010199\n'
+                    logger.warning('Enter activation date as <%d%m%y>, for example: 010199,\n'
                           '          or press <Enter> to skip this step')
-                    print('   ---   ')
+                    print('---------')
             break
         else:
             logger.warning('incorrect input, try again')
 
     input('press <Enter> to exit...')
-    logger.debug('-- end of log --')
-    logger.debug('     ......     ')
+    logger.debug('--- Log stopped ---')
 
 if __name__ == '__main__':
     main()
