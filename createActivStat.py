@@ -150,7 +150,7 @@ def main():
             logger.warning('incorrect input, try again')
 
     input('press <Enter> to exit...')
-    logger.debug('--- Log stopped ---')
+    logger.debug('--- Log stopped ---\n')
 
 if __name__ == '__main__':
     main()
