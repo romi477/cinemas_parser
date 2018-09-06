@@ -143,11 +143,13 @@ def main():
                     break
                 elif not fullmatch(r'\d\d\d\d\d\d', activDate):
                     logger.warning('Enter activation date as <%d%m%y>, for example: 010199,\n'
-                          '          or press <Enter> to skip this step')
-                    print('---------')
+                          '          or press <Enter> to set date=010199')
+                    print('-----------------------------------------------------------------\n')
             break
         else:
             logger.warning('incorrect input, try again')
+            print('------------------------------------')
+            print('------------------------------------')
 
     input('press <Enter> to exit...')
     logger.debug('--- Log stopped ---\n')
