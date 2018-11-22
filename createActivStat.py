@@ -34,56 +34,51 @@ ch2.setFormatter(formatter2)
 logger.addHandler(ch1)
 logger.addHandler(ch2)
 
-def getLst_i(i):
-    tree = ET.ElementTree(file=i)
+def xml_data(file):
+    tree = ET.ElementTree(file=file)
     root = tree.getroot()
     title = root.attrib['title']
     uid = root.attrib['UniqueId']
     owner = tree.find('Owner').attrib['Value']
     return {'title': title, 'uid': uid, 'owner': owner}
 
-def get_xmls(xml_lst):
-    lst = []
-    lstExclude = []
-    for i in xml_lst:
-        try:
-            nameDir = i.split('\\')[1]
-            if not nameDir.startswith('-'):
-                lst.append(getLst_i(i))
-            else:
-                if nameDir not in lstExclude:
-                    lstExclude.append(nameDir)
-                    logger.warning(f'Directory {nameDir[1:]} was skipped')
-                continue
-        except IndexError:
-            lst.append(getLst_i(i))
-    return lst
+def evaluate_path(pth):
+    try:
+        dir_name = pth.split('\\')[1]
+    except IndexError:
+        return xml_data(pth)
+    if dir_name.startswith('-'):
+        logger.info(f'{pth} was skipped')
+        return None
+    else:
+        return xml_data(pth)
+
+def create_single_stat(dct):
+    cinema = ET.Element('Cinema')
+    cinema.set('Name', f'{dct["title"]}-{dct["owner"]}')
+    cinema.set('UID', f'{dct["uid"]}')
+    return cinema
 
 def create_stat(lst):
-    if lst:
-        root = ET.Element('StatisticsExportKey')
-        for d in lst:
-            cinema = ET.Element('Cinema')
-            cinema.set('Name', f'{d["title"]}-{d["owner"]}')
-            cinema.set('UID', f'{d["uid"]}')
-            logger.info(f'Statistics.key.xml for {d["title"]} <{d["uid"]}> was created')
-            root.append(cinema)
-        tree = ET.ElementTree(root)
-        with open('Statistics.key.xml', 'wb') as f:
-            tree.write(f)
-    else:
-        logger.warning('All xmls in <!Cinemas> were skipped')
+    root = ET.Element('StatisticsExportKey')
+    for d in lst:
+        root.append(create_single_stat(d))
+        logger.info(f'Statistics for {d["title"]} <{d["uid"]}> was created')
+    tree = ET.ElementTree(root)
+    with open('Statistics.key.xml', 'wb') as f:
+        tree.write(f)
+    logger.info(f'Statistics.key.xml was written')
 
-def create_active(lst, activDate):
-        formatDate = f'20{activDate[4:]}/{activDate[2:4]}/{activDate[:2]}'
-        root = ET.Element('Activation')
-        root.set('UID', f'{lst[0]["uid"]}')
-        root.set('Expiration', formatDate)
-        logger.info(f'Activation.xml.xml for <{lst[0]["uid"]}> in <{activDate}> was created')
-        tree = ET.ElementTree(root)
-        with open('Activation.xml.xml', 'wb') as f:
-            tree.write(f)
-        logger.info(f'<Date of activation> --> {activDate}')
+def create_activ(dct, activation_date):
+    format_date = f'20{activation_date[4:]}/{activation_date[2:4]}/{activation_date[:2]}'
+    root = ET.Element('Activation')
+    root.set('UID', f'{dct["uid"]}')
+    root.set('Expiration', format_date)
+    tree = ET.ElementTree(root)
+    logger.info(f'Activation for <{dct["uid"]}> in <{activation_date}> was created')
+    with open('Activation.xml.xml', 'wb') as f:
+        tree.write(f)
+    logger.info(f'Activation.xml.xml was written')
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=False)
@@ -100,8 +95,8 @@ def sign_compress(cmd, compress):
 
 def main():
     logger.debug('--- Log started ---')
-    filesForDelete = ['Activation.xml.xml', 'Activation.xml', 'Statistics.key.xml', 'Statistics.key']
-    for file in filesForDelete:
+    files_for_delete = ['Activation.xml.xml', 'Activation.xml', 'Statistics.key.xml', 'Statistics.key']
+    for file in files_for_delete:
         try:
             os.remove(file)
             logger.debug(f'{file} was removed')
@@ -115,44 +110,48 @@ def main():
         2. Create stat-data & activation for 'Cinema.xml' in current dir
               """)
         choice = input('your choice: ')
+
         if choice == '1':
-            xml_folder = glob.glob(r'!Cinemas\*\*\Cinema.xml')
-            if xml_folder:
-                create_stat(get_xmls(xml_folder))
-                sign_compress(statCmd, compressStat)
-                break
+            paths_list = glob.glob(r'!Cinemas\*\*\Cinema.xml')
+            if paths_list:
+                xmls_data_list = [evaluate_path(i) for i in paths_list if evaluate_path(i)]
+                if xmls_data_list:
+                    create_stat(xmls_data_list)
+                    sign_compress(statCmd, compressStat)
+                    break
+                else:
+                    logger.error('All xmls were skipped')
+                    break
             logger.error('There are no xmls in <!Cinemas>')
+            break
         elif choice == '2':
-            xml_file = glob.glob(r'Cinema.xml')
+            xml_file = 'Cinema.xml'
+            if not os.path.exists(xml_file):
+                logger.error('There is no Cinema.xml in current dir')
+                break
             while True:
-                activDate = input('enter activation date: ')
-                if not xml_file:
-                    logger.error('There is no Cinema.xml in current dir')
-                    break
-                if fullmatch(r'\d\d\d\d\d\d', activDate):
-                    create_stat(get_xmls(xml_file))
+                activation_date = input('enter activation date: ')
+                if not activation_date:
+                    activation_date = '010199'
+                if fullmatch(r'\d\d\d\d\d\d', activation_date):
+                    create_stat([evaluate_path(xml_file)])
                     sign_compress(statCmd, compressStat)
-                    create_active(get_xmls(xml_file), activDate)
+                    create_activ(evaluate_path(xml_file), activation_date)
                     sign_compress(activCmd, compressActiv)
                     break
-                elif not activDate:
-                    create_stat(get_xmls(xml_file))
-                    sign_compress(statCmd, compressStat)
-                    create_active(get_xmls(xml_file), '010199')
-                    sign_compress(activCmd, compressActiv)
-                    break
-                elif not fullmatch(r'\d\d\d\d\d\d', activDate):
+                else:
                     logger.warning('Enter activation date as <%d%m%y>, for example: 010199,\n'
-                          '          or press <Enter> to set date=010199')
+                          '          or press <Enter> to set default date = 010199')
                     print('-----------------------------------------------------------------\n')
             break
         else:
-            logger.warning('incorrect input, try again')
+            logger.error('incorrect input, try again')
             print('------------------------------------')
             print('------------------------------------')
 
     input('press <Enter> to exit...')
     logger.debug('--- Log stopped ---\n')
+
 
 if __name__ == '__main__':
     main()
