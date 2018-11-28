@@ -5,14 +5,16 @@ logs/
 /!Cinemas/
 Tools/
 Activation.xml.xml
+Activation.xml
 Cinema.xml
 CinemaSettings.xml
 Statistics.key.xml
+Statistics.key
 second.py
 third.py
 fourth.py
 IPS.exe
 SCC2Report.pak
-reportDir/
+ReportDir/
 __pycache__/
 

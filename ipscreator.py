@@ -3,34 +3,11 @@ import xml.etree.ElementTree as ET
 import sys
 import os
 import json
-from datetime import datetime
 import time
 import logging
 
 
-date_today = datetime.today()
-if not os.path.exists('logs'):
-    os.mkdir('logs')
-pth = f'logs\{date_today.strftime("%m-%Y")}'
-if not os.path.exists(pth):
-    os.mkdir(pth)
-
-logger = logging.getLogger('ipscreator')
-logger.setLevel(logging.DEBUG)
-
-ch1 = logging.StreamHandler()
-ch1.setLevel(logging.INFO)
-ch2 = logging.FileHandler(filename=pth + f'\{date_today.strftime("%d-%m-%Y")}.log', delay=False)
-ch2.setLevel(logging.DEBUG)
-
-formatter1 = logging.Formatter('[%(levelname)s] <%(funcName)s> %(message)s')
-formatter2 = logging.Formatter('[%(asctime)s %(levelname)s] <%(funcName)s> %(message)s', '%d/%m/%Y %H:%M:%S')
-
-ch1.setFormatter(formatter1)
-ch2.setFormatter(formatter2)
-logger.addHandler(ch1)
-logger.addHandler(ch2)
-
+logger = logging.getLogger('sccscript.ipscreator')
 
 def prepare_regdata():
     cmd = r'Tools\ips_creator\prepareRegData.bat'
@@ -90,7 +67,6 @@ def prepare_payload(uid):
         sys.exit(1)
 
 def main_ips_creator():
-    # logger.debug('--- <IPS_create> log started ---')
     filesForDelete = [
         'IPS.exe',
         r'Tools\ips_creator\payload.bin',
@@ -104,9 +80,7 @@ def main_ips_creator():
         except FileNotFoundError:
             logger.warning(f"{file} wasn't found")
             pass
+
     validity, uid, data = get_all_data()
     create_payload(validity, uid, data)
     prepare_payload(uid)
-    # input('press <Enter> to exit...')
-    # logger.debug('--- <IPS_create> log stopped ---\n')
-

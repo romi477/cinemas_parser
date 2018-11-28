@@ -21,7 +21,7 @@ def get_unpack(proc1, proc2):
 
 def find_uid():
     try:
-        with open(r'reportDir\reporter.log', 'r') as file:
+        with open(r'ReportDir\reporter.log', 'r') as file:
             lines = file.readlines()
     except FileNotFoundError:
         print('ERROR: reporter.log not found...')
@@ -66,11 +66,11 @@ def go_path(path):
 
 
 def main_find_uid():
-    proc1 = r'Tools\find_uid\Compressor.exe unpack SCC2Report.pak reportDir'
-    proc2 = r'Tools\find_uid\XMLB2XML.exe reportDir\systeminfo.xmlb'
+    proc1 = r'Tools\find_uid\Compressor.exe unpack SCC2Report.pak ReportDir'
+    proc2 = r'Tools\find_uid\XMLB2XML.exe ReportDir\systeminfo.xmlb'
     try:
-        print('<reportDir> is deleting, please wait!')
-        shutil.rmtree('reportDir')
+        print('<ReportDir> is deleting, please wait!')
+        shutil.rmtree('ReportDir')
         print('ok, here we go!')
     except:
         pass
