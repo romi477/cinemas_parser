@@ -1,7 +1,6 @@
 import subprocess
 import xml.etree.ElementTree as ET
 import sys
-import os
 import json
 import time
 import logging
@@ -66,21 +65,18 @@ def prepare_payload(uid):
         logger.error('fail')
         sys.exit(1)
 
-def main_ips_creator():
-    filesForDelete = [
-        'IPS.exe',
-        r'Tools\ips_creator\payload.bin',
-        r'Tools\ips_creator\Payload.xml',
-        r'Tools\ips_creator\regdata.b64'
-    ]
-    for file in filesForDelete:
-        try:
-            os.remove(file)
-            logger.info(f'{file} was removed')
-        except FileNotFoundError:
-            logger.warning(f"{file} wasn't found")
-            pass
 
-    validity, uid, data = get_all_data()
-    create_payload(validity, uid, data)
-    prepare_payload(uid)
+def main_ips_creator():
+    subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+
+    while True:
+        print("""
+        <-- 
+            1. Create IPS from CinemaSettings.xml in work dir
+            2. Create IPS from unpacked report (update "marker")
+            3. Step back
+              """)
+
+        validity, uid, data = get_all_data()
+        create_payload(validity, uid, data)
+        prepare_payload(uid)

@@ -48,7 +48,7 @@ def create_activ(dct, activation_date):
     root.set('UID', f'{dct["uid"]}')
     root.set('Expiration', format_date)
     tree = ET.ElementTree(root)
-    logger.info(f'Activation for <{dct["uid"]}> in <{activation_date}> was created')
+    logger.info(f'Activation.xml.xml for <{dct["uid"]}> in <{activation_date}> was created')
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
     logger.info(f'Activation.xml.xml was written')
@@ -68,14 +68,7 @@ def sign_compress(cmd, compress):
 
 def main_create_activstat():
 
-    files_for_delete = ['Activation.xml.xml', 'Activation.xml', 'Statistics.key.xml', 'Statistics.key']
-    for file in files_for_delete:
-        try:
-            os.remove(file)
-            logger.debug(f'{file} was removed')
-        except FileNotFoundError:
-            logger.debug(f"{file} was't found" )
-            pass
+    subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
 
     activCmd = r'Tools\activ_stat\XmlSigner.exe -sign -key Tools\activ_stat\ActivationKey.RSAPrivate -file Activation.xml.xml'
     statCmd = r'Tools\activ_stat\XmlSigner.exe -sign -key Tools\activ_stat\OwnerIDSignKey.RSAPrivate -file Statistics.key.xml'
@@ -84,14 +77,15 @@ def main_create_activstat():
 
     while True:
         print("""
+        <-- 
             1. Create statistics for all xmls in <!Cinemas>
-            2. Create statistics & activation for Cinema.xml in current dir
+            2. Create statistics & activation for Cinema.xml in work dir
             3. Step back
               """)
         choice = input('your choice: ')
 
         if choice == '1':
-            paths_list = glob.glob(r'!Cinemas\*\*\Cinema.xml')
+            paths_list = glob.iglob(r'!Cinemas\*\*\Cinema.xml')
             if paths_list:
                 xmls_data_list = [evaluate_path(i) for i in paths_list if evaluate_path(i)]
                 if xmls_data_list:
