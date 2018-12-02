@@ -29,9 +29,7 @@ def find_uid_in_reportdir():
                 dict_uid['dongle'] = str_uid.group(0)
     return dict_uid
 
-def db_way():
-    with open('config.json', 'r', encoding='utf8') as file:
-        json_obj = json.load(file)
+def db_way(json_obj):
     iter_paths = glob.iglob(json_obj['path'], recursive=True)
     return [path for path in iter_paths if 'old' not in path]
 
@@ -56,16 +54,17 @@ def go_path(path):
 def copy_cinema_to_workdir(path):
     abs_path = os.path.abspath(path).split(r'Cinema.xml')[0]
     try:
-        shutil.copy2(os.path.join(abs_path, r'Cinema.xml'), os.path.curdir)
-        logger.info('Cinema.xml was copied in work dir')
+        shutil.copy2(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
     except IOError:
         logger.error('Cinema.xml was not copied in work dir')
+        return
     try:
-        shutil.copy2(os.path.join(abs_path, r'CinemaSettings.xml'), os.path.curdir)
-        logger.info('CinemaSettings.xml was copied in work dir')
+        shutil.copy2(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
     except IOError:
         logger.error('CinemaSettings.xml was not copied in work dir')
-
+        return
+    logger.info('Cinema.xml was copied in work dir')
+    logger.info('CinemaSettings.xml was copied in work dir')
 
 def main_find_uid():
     if os.path.exists('ReportDir'):
@@ -74,7 +73,14 @@ def main_find_uid():
 
     subprocess.run(r'Tools\unpack_report\start_unpack.bat', shell=False)
 
-    lst_paths = db_way()
+    try:
+        with open('config.json', 'r', encoding='utf8') as file:
+            json_obj = json.load(file)
+    except FileNotFoundError:
+        logger.error('config.json not found in work dir!!!')
+        return
+
+    lst_paths = db_way(json_obj)
     uid_from_reporter = find_uid_in_reportdir()
 
     if uid_from_reporter:
@@ -96,7 +102,7 @@ def main_find_uid():
 
     if len(list_paths_in_db) == 1:
         copy_cinema_to_workdir(list_paths_in_db[0])
-        key = input('press <Enter>/<other key> to go to the cinema dir, or not :').lower()
+        key = input('press <Enter>/<other key> to go to the cinema dir, or not :')
         if key == '':
             go_path(list_paths_in_db[0])
         else:
