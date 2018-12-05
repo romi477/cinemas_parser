@@ -4,6 +4,13 @@ import logging
 
 logger = logging.getLogger('sccscript.utils')
 
+def check_dict_key(func):
+    def wrapper(*args, **kwargs):
+        result = func(*args, **kwargs)
+        if result:
+            kwargs['dct'][kwargs['key']] = result
+    return wrapper
+
 def check_input_date(func):
     def wrapper(*args, **kwargs):
         if kwargs['inp_date']:
@@ -12,9 +19,10 @@ def check_input_date(func):
             else:
                 logger.error(f'Enter {kwargs["key"]} date as <%d%m%y>, for example: 010199,\n'
                               'or press <Enter> to set default date ...')
-                logger.info('------------------------------------------------------------\n')
+                print('------------------------------------------------------------\n')
                 return
         else:
+            logger.debug(f'default value of {kwargs["key"]} date')
             return kwargs['def_date']
     return wrapper
 
@@ -37,5 +45,9 @@ def sign_compress(cmd, compress):
             logger.info(f'{compress} - OK')
         else:
             logger.error(f'{compress} - FAIL')
+            input('press <Enter> to return...')
+            print('----------------------------')
     else:
         logger.error(f'{cmd} - FAIL')
+        input('press <Enter> to return...')
+        print('----------------------------')

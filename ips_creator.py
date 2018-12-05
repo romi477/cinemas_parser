@@ -13,12 +13,12 @@ def copy_registry_file(registry_file):
     try:
         shutil.copy2(registry_file, 'CinemaSettings.xml')
     except FileNotFoundError:
-        logger.error('systeminfo.xmlb.xml was not found in ReportDir')
+        logger.error(r'ReportDir\systeminfo.xmlb.xml has not been found')
         return
     except IOError:
-        logger.error('systeminfo.xmlb.xml was not copied in work dir')
+        logger.error(r'ReportDir\systeminfo.xmlb.xml has not been copied')
         return
-    logger.info('systeminfo.xmlb.xml was copied in work dir')
+    logger.info(r'ReportDir\systeminfo.xmlb.xml has been copied')
     return True
 
 def get_marker(reporter_file):
@@ -26,65 +26,56 @@ def get_marker(reporter_file):
         with open(reporter_file, 'r') as f:
             lines = f.readlines()
     except FileNotFoundError:
-        logger.error('reporter.log was not found in ReportDir')
+        logger.error(r'ReportDir\reporter.log was not found')
         return
     for line in lines:
         if 'Dongle marker' in line:
             marker = line.strip()[-19:]
-            return marker
+            return marker if marker != '1970/01/01 00:00:00' else '1970/01/01 03:00:00'
 
 def get_seconds_from_marker(marker):
-    split1 = marker.split(' ')
-    split2 = split1[0].split('/')
-    split3 = split1[1].split(':')
-    struct_time = (
-        int(split2[0]),
-        int(split2[1]),
-        int(split2[2]),
-        int(split3[0]),
-        int(split3[1]),
-        int(split3[2]),
-        0, 0, 0
-    )
+    arg1 = marker.split()[0].split('/')
+    arg2 = marker.split()[1].split(':')
+    struct_time = (int(arg1[0]), int(arg1[1]), int(arg1[2]), int(arg2[0]), int(arg2[1]), int(arg2[2]), 0, 0, 0)
     tm = time.mktime(struct_time)
+    logger.info('seconds from marker have been taken')
     return int(tm) + 62135694000
 
 def set_tag_to_cinemasettings(tag, atr, value):
-    tree = ET.parse('CinemaSettings.xml')
+    try:
+        tree = ET.parse('CinemaSettings.xml')
+    except ET.ParseError:
+        logger.error('CinemaSettings.xml have a parseerror-mistake')
+        return
     tr = tree.find(tag)
     tr.set(atr, str(hex(value))[2:])
     tree.write('CinemaSettings.xml')
-    logger.info(f'Acvation date {value} was set to CinemaSettings.xml ')
-
-def prepare_regdata():
-    cmd = r'Tools\ips_creator\prepareRegData.bat'
-    code = subprocess.run(cmd, shell=False)
-    if code.returncode == 0:
-        logger.info('prepare regdata - ok')
-    else:
-        logger.error('prepare regdata - fail')
+    logger.info(f'<{tag}> {atr} = {value} </{tag}> has been set to CinemaSettings.xml ')
+    return True
 
 @endless_cycle
 @check_input_date
-def input_date_to_seconds(date):
-    struct_time = (int('20' + date[4:]), int(date[2:4]), int(date[:2]), 0, 0, 0, 0, 0, 0)
+def input_date_to_seconds(inp_date):
+    struct_time = (int('20' + inp_date[4:]), int(inp_date[2:4]), int(inp_date[:2]), 0, 0, 0, 0, 0, 0)
     tm = time.mktime(struct_time)
     return int(tm) + 62135694000
 
 
-def get_data_from_xml():
+def get_data_from_xmls(cmd):
+    logger.debug('getting data from xmls has been started')
     activation = input_date_to_seconds(
-        inp_date=input('input activation date: '),
+        inp_date=input('activation date: '),
         def_date=66206592000,
         key='activation'
     )
     validity = input_date_to_seconds(
-        inp_date=input('input validity date: '),
-        def_date=time.time() + 3600 + 62135694000,
+        inp_date=input('validity date: '),
+        def_date=time.time() + 86400 + 62135694000,
         key='validity'
     )
-    set_tag_to_cinemasettings('TR', 'D', activation)
-    prepare_regdata()
+    if not set_tag_to_cinemasettings('TR', 'D', activation):
+        return False
+    subprocess.run(cmd, shell=False)
     tree = ET.parse('Cinema.xml')
     root = tree.getroot()
     uid = root.attrib['UniqueId']
@@ -92,10 +83,10 @@ def get_data_from_xml():
         with open(r'Tools\ips_creator\regdata.b64', 'r') as data:
             regdata = data.read()
     except FileNotFoundError:
-        logger.error('regdata.b64 not found')
+        logger.error(r'Tools\ips_creator\regdata.b64 not found')
         return
-    logger.info('All data have been taken')
-    return int(validity), uid, regdata
+    logger.info('all data from xmls has been taken')
+    return {'validity': int(validity), 'uid': uid, 'regdata': regdata}
 
 def create_payload(validity, uid, regdata):
     root = ET.Element('IPSPayload')
@@ -105,60 +96,66 @@ def create_payload(validity, uid, regdata):
     tree = ET.ElementTree(root)
     with open(r'Tools\ips_creator\Payload.xml', 'wb') as payload:
         tree.write(payload)
-    logger.info('Payload.xml was prepared')
-
-def prepare_payload(uid):
-    cmd = r'Tools\ips_creator\preparePayload.bat'
-    code = subprocess.run(cmd, shell=False)
-    if code.returncode == 0:
-        logger.info(f'IPS.exe for <{uid}> was created')
-    else:
-        logger.error('Creating IPS.exe failed')
-        return
+    logger.info(r'Tools\ips_creator\Payload.xml was prepared')
 
 
 def main_ips_creator():
-    subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
-
     while True:
         print("""
         <-- 
             1. Create IPS from CinemaSettings in work dir
             2. Create IPS from unpacked report (update "marker")
-            3. Step back
+            3. Main menu
               """)
-
         choice = input('your choice: ')
-
         if choice == '1':
-            pass
-
+            subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+            print()
         elif choice == '2':
+            subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+            print()
             registry_file = r'ReportDir\systeminfo.xmlb.xml'
             reporter_file = r'ReportDir\reporter.log'
-
             if copy_registry_file(registry_file):
                 marker = get_marker(reporter_file)
-                print(marker)
             else:
-                continue
+                input('press <Enter> to return...')
+                print('----------------------------')
+                break
             if marker:
                 marker_seconds = get_seconds_from_marker(marker)
-                set_tag_to_cinemasettings('D', 'M', marker_seconds)
+                set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
+                if not set_marker:
+                    input('press <Enter> to return...')
+                    print('----------------------------')
+                    break
             else:
-                logger.warning('There is no marker in reporter.log')
-                continue
-
+                logger.warning(r'there is no marker in ReportDir\reporter.log')
+                input('press <Enter> to return...')
+                print('----------------------------')
+                break
         elif choice == '3':
-            logger.debug('Back to the main menu')
-            return
-
-        c_file = r'Cinema.xml'
-        cs_file = r'CinemaSettings.xml'
-        if os.path.exists(c_file) and os.path.exists(cs_file):
-            validity, uid, regdata = get_data_from_xml()
-            create_payload(validity, uid, regdata)
-            prepare_payload(uid)
+            logger.debug('back to main menu')
+            break
         else:
-            logger.error('There is no Cinema.xml or CinemaCinema.xml in work dir')
-            return
+            logger.error('incorrect input, try again')
+            print('----------------------------')
+
+        if os.path.exists('Cinema.xml') and os.path.exists('CinemaSettings.xml'):
+            regdata_cmd = r'Tools\ips_creator\prepareRegData.bat'
+            data_from_xmls = get_data_from_xmls(regdata_cmd)
+            if data_from_xmls:
+                create_payload(**data_from_xmls)
+                payload_cmd = r'Tools\ips_creator\preparePayload.bat'
+                subprocess.run(payload_cmd, shell=False)
+                logger.info(f'IPS.exe for <{data_from_xmls["uid"]}> was created')
+            else:
+                logger.error('data from xmls has not been taken')
+                input('press <Enter> to return...')
+                print('----------------------------')
+                break
+        else:
+            logger.error('there is no Cinema.xml or CinemaCinema.xml in work dir')
+            input('press <Enter> to return...')
+            print('----------------------------')
+            break

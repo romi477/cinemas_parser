@@ -5,45 +5,68 @@ import re
 import shutil
 import glob
 import logging
+from pprint import pprint
+from utils import check_dict_key
 # from msvcrt import getch
 
 
 logger = logging.getLogger('sccscript.unpackreport')
 
-def find_uid_in_reportdir():
+@check_dict_key
+def parse_string(phrase, line):
+    return ' '.join((line.split(']')[-1].split())) if phrase in line else None
+
+
+def find_info_in_reporter():
     try:
         with open(r'ReportDir\reporter.log', 'r') as file:
             lines = file.readlines()
     except FileNotFoundError:
-        logger.error('ERROR: reporter.log not found')
         return
-
-    dict_uid = {}
+    reporter_dict = dict.fromkeys(
+        [
+            'registry_uid',
+            'dongle_uid',
+            'sccfm_version',
+            'trial_date',
+            'registry_marker',
+            'dongle_marker',
+            'rtc_unc',
+            'host_unc'
+        ]
+    )
     for line in lines:
-        str_uid = re.search(r'\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w', line)
-        if str_uid:
-            logger.info(line.split(']')[-1].strip())
-            if 'Instance' in line:
-                dict_uid['registry'] = str_uid.group(0)
-            elif 'dongle' in line:
-                dict_uid['dongle'] = str_uid.group(0)
-    return dict_uid
+        uid = re.search(r'\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w', line)
+        if uid:
+            if 'Instance UID' in line:
+                reporter_dict['registry_uid'] = uid.group(0)
+            elif 'SCC UID from dongle' in line:
+                reporter_dict['dongle_uid'] = uid.group(0)
+
+        parse_string('Dongle SCCFW version', line, dct=reporter_dict, key='sccfm_version')
+        parse_string('Trial end date', line, dct=reporter_dict, key='trial_date')
+        parse_string('Marker Date', line, dct=reporter_dict, key='registry_marker')
+        parse_string('Dongle marker', line, dct=reporter_dict, key='dongle_marker')
+        parse_string('RTC UNC clock time', line, dct=reporter_dict, key='rtc_unc')
+        parse_string('Host UNC clock time', line, dct=reporter_dict, key='host_unc')
+    return reporter_dict
+
+
 
 def db_way(json_obj):
     iter_paths = glob.iglob(json_obj['path'], recursive=True)
     return [path for path in iter_paths if 'old' not in path]
 
-def find_uid_in_db(lst, uid):
-    logger.info('Searching UID in database, please wait...')
-    list_from_db = []
-    for ls in lst:
-        with open(ls, 'r') as file:
+def find_uid_in_db(paths_list, uid):
+    logger.info('finding UID in database, please wait...')
+    uid_list_from_db = []
+    for path in paths_list:
+        with open(path, 'r') as file:
             read_obj = file.read()
         uid_tmp = re.search(uid, read_obj)
         if uid_tmp:
-            list_from_db.append(ls)
-            logger.info(f'[ {ls} ]' + ' was found in database')
-    return list_from_db
+            uid_list_from_db.append(path)
+    return uid_list_from_db
 
 def go_path(path):
     abs_path = os.path.abspath(path)
@@ -56,59 +79,88 @@ def copy_cinema_to_workdir(path):
     try:
         shutil.copy2(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
     except IOError:
-        logger.error('Cinema.xml was not copied in work dir')
+        logger.error('Cinema.xml has not been copied to the work dir')
         return
     try:
         shutil.copy2(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
     except IOError:
-        logger.error('CinemaSettings.xml was not copied in work dir')
+        logger.error('CinemaSettings.xml has not been copied to the work dir')
         return
-    logger.info('Cinema.xml was copied in work dir')
-    logger.info('CinemaSettings.xml was copied in work dir')
+    logger.info('Cinema.xml has been copied to the work dir')
+    logger.info('CinemaSettings.xml has been copied to the work dir')
+
+def print_func(def_value, value):
+    print(value) if value else print(def_value)
 
 def main_find_uid():
     if os.path.exists('ReportDir'):
         logger.info('<ReportDir> is deleting, please wait...')
-        shutil.rmtree('ReportDir')
+        shutil.rmtree('ReportDir', ignore_errors=True)
 
     subprocess.run(r'Tools\unpack_report\start_unpack.bat', shell=False)
-
+    print()
     try:
         with open('config.json', 'r', encoding='utf8') as file:
             json_obj = json.load(file)
     except FileNotFoundError:
-        logger.error('config.json not found in work dir!!!')
+        logger.error('config.json has not been found in work dir!!!')
+        input('press <Enter> to return...')
+        print('----------------------------')
         return
+    paths_list = db_way(json_obj)
+    info_from_reporter = find_info_in_reporter()
 
-    lst_paths = db_way(json_obj)
-    uid_from_reporter = find_uid_in_reportdir()
-
-    if uid_from_reporter:
-        if 'dongle' in uid_from_reporter.keys() and 'registry' in uid_from_reporter.keys():
-            if uid_from_reporter['dongle'] == uid_from_reporter['registry']:
-                list_paths_in_db = find_uid_in_db(lst_paths, uid_from_reporter['dongle'])
+    if info_from_reporter:
+        if info_from_reporter['registry_uid'] and info_from_reporter['dongle_uid']:
+            if info_from_reporter['registry_uid'] == info_from_reporter['dongle_uid']:
+                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
             else:
-                logger.warning('Dongle UID is not equal UID from registry!!!')
+                logger.warning('dongle UID is not equal registry UID !!!')
                 input('press <Enter> to return...')
+                print('----------------------------')
                 return
         else:
-            list_paths_in_db = find_uid_in_db(
-                lst_paths,
-                uid_from_reporter.get('dongle', uid_from_reporter.get('registry'))
-            )
+            if info_from_reporter['dongle_uid']:
+                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
+            elif info_from_reporter['registry_uid']:
+                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['registry_uid'])
+            else:
+                logger.warning('none UID has not been found in ReportDir/reporter.log')
+                input('press <Enter> to return...')
+                print('----------------------------')
+                return
     else:
+        logger.error(r'ReportDir\reporter.log not found')
         input('press <Enter> to return...')
+        print('----------------------------')
         return
 
-    if len(list_paths_in_db) == 1:
-        copy_cinema_to_workdir(list_paths_in_db[0])
-        key = input('press <Enter>/<other key> to go to the cinema dir, or not :')
-        if key == '':
-            go_path(list_paths_in_db[0])
-        else:
-            return
-    else:
-        logger.warning('More then one UID exist in database')
+    if list_paths_in_db:
+        print('----------------------------')
+        print('  REPORTER INFO:')
+        print_func('Trial date:', info_from_reporter['trial_date'])
+        print_func('Registry marker:', info_from_reporter['registry_marker'])
+        print_func('Dongle marker:', info_from_reporter['dongle_marker'])
+        print(f'Registry UID: {info_from_reporter["registry_uid"]}')
+        print_func('SCCFM version:', info_from_reporter['sccfm_version'])
+        print_func('RTC UNC clock time:', info_from_reporter['rtc_unc'])
+        print_func('HOST UNC clock time:', info_from_reporter['host_unc'])
+        print(f'Dongle UID: {info_from_reporter["dongle_uid"]}')
+        print('  FOUND PATHS:')
+        pprint(list_paths_in_db)
+        print('----------------------------')
         input('press <Enter> to return...')
-        return
+
+        if len(list_paths_in_db) == 1:
+            copy_cinema_to_workdir(list_paths_in_db[0])
+            print('----------------------------')
+        else:
+            logger.warning('more then one UID exist in database')
+            logger.warning('xmls have not been copied to the work dir')
+            print('----------------------------')
+
+        for path in list_paths_in_db:
+            go_path(path)
+            print('----------------------------')
+
 

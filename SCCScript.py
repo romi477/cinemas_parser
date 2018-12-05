@@ -59,10 +59,10 @@ def main():
         elif choice == '4':
             logger.info('Quit')
             break
+
         else:
             logger.error('incorrect input, try again')
-            print('************************************')
-
+            print('----------------------------')
 
     logger.debug('--- Main log stop ---\n')
 

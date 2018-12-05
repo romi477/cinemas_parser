@@ -8,24 +8,31 @@ from utils import check_input_date, endless_cycle, sign_compress
 
 logger = logging.getLogger('sccscript.createactivstat')
 
-def xml_data_dict(file):
-    tree = ET.ElementTree(file=file)
+def get_xml_data_dict(file):
+    try:
+        tree = ET.ElementTree(file=file)
+    except ET.ParseError:
+        logger.error('Cinema.xml have a parseerror-mistake')
+        return
     root = tree.getroot()
     title = root.attrib['title']
     uid = root.attrib['UniqueId']
-    owner = tree.find('Owner').attrib['Value']
+    try:
+        owner = tree.find('Owner').attrib['Value']
+    except AttributeError:
+        owner = tree.find('OwnerPassword').attrib['Value']
     return {'title': title, 'uid': uid, 'owner': owner}
 
 def evaluate_path(pth):
     try:
         dir_name = pth.split(os.path.sep)[1]
     except IndexError:
-        return xml_data_dict(pth)
+        return get_xml_data_dict(pth)
     if dir_name.startswith('-'):
-        logger.info(f'{pth} was skipped')
+        logger.info(f'{pth} has been skipped')
         return None
     else:
-        return xml_data_dict(pth)
+        return get_xml_data_dict(pth)
 
 def create_single_stat(xml_dict):
     cinema = ET.Element('Cinema')
@@ -37,36 +44,34 @@ def create_stat(xml_dict_list):
     root = ET.Element('StatisticsExportKey')
     for xml_dict in xml_dict_list:
         root.append(create_single_stat(xml_dict))
-        logger.info(f'Statistics for {xml_dict["title"]} <{xml_dict["uid"]}> was created')
+        logger.info(f'Statistics for {xml_dict["title"]} <{xml_dict["uid"]}> has been created')
     tree = ET.ElementTree(root)
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
-    logger.info(f'Statistics.key.xml was written')
+    logger.info(f'Statistics.key.xml has been written')
 
 @endless_cycle
 @check_input_date
-def get_time(inp_date, def_date, key):
+def get_time(inp_date):
     return f'20{inp_date[4:]}/{inp_date[2:4]}/{inp_date[:2]}'
 
 def create_activ(cinema_dict):
     format_date = get_time(
-        inp_date=input('enter activation date: '),
-        def_date=r'2099/01/01',
+        inp_date=input('activation date: '),
+        def_date='2099/01/01',
         key='activation'
     )
     root = ET.Element('Activation')
     root.set('UID', f'{cinema_dict["uid"]}')
     root.set('Expiration', format_date)
     tree = ET.ElementTree(root)
-    logger.info(f'Activation.xml.xml for <{cinema_dict["uid"]}> in <{format_date}> was created')
+    logger.info(f'Activation.xml.xml for <{cinema_dict["uid"]}> in <{format_date}> has been created')
     with open('Activation.xml.xml', 'wb') as f:
         tree.write(f)
-    logger.info(f'Activation.xml.xml was written')
+    logger.info(f'Activation.xml.xml has been written')
 
 
 def main_create_activstat():
-
-    subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
 
     activ_cmd = r'Tools\activ_stat\XmlSigner.exe -sign -key Tools\activ_stat\ActivationKey.RSAPrivate -file Activation.xml.xml'
     stat_cmd = r'Tools\activ_stat\XmlSigner.exe -sign -key Tools\activ_stat\OwnerIDSignKey.RSAPrivate -file Statistics.key.xml'
@@ -78,36 +83,58 @@ def main_create_activstat():
         <-- 
             1. Create statistics for all xmls in <!Cinemas>
             2. Create statistics & activation for Cinema.xml in work dir
-            3. Step back
+            3. Main menu
               """)
         choice = input('your choice: ')
         if choice == '1':
+            subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
+            print()
             paths_list = glob.iglob(r'!Cinemas\*\*\Cinema.xml')
             if paths_list:
                 xmls_data_list = [evaluate_path(i) for i in paths_list if evaluate_path(i)]
                 if xmls_data_list:
                     create_stat(xmls_data_list)
                     sign_compress(stat_cmd, compress_stat)
+                    print('----------------------------')
                     break
                 else:
-                    logger.warning('All xmls were skipped')
-                    continue
-            logger.error('There are no xmls in <!Cinemas>')
-            continue
+                    logger.warning('all xmls were skipped')
+                    input('press <Enter> to return...')
+                    print('----------------------------')
+                    break
+            else:
+                logger.error('there are no xmls in <!Cinemas>')
+                input('press <Enter> to return...')
+                print('----------------------------')
+                break
+
         elif choice == '2':
+            subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
+            print()
             xml_file = 'Cinema.xml'
-            if not os.path.exists(xml_file):
-                logger.error('There is no Cinema.xml in work dir')
-                continue
-            create_activ(xml_data_dict(xml_file))
-            sign_compress(activ_cmd, compress_activ)
-            create_stat([evaluate_path(xml_file)])
-            sign_compress(stat_cmd, compress_stat)
+            if os.path.exists(xml_file):
+                xml_data_dict = get_xml_data_dict(xml_file)
+                if xml_data_dict:
+                    create_activ(xml_data_dict)
+                    create_stat([xml_data_dict])
+                    sign_compress(activ_cmd, compress_activ)
+                    sign_compress(stat_cmd, compress_stat)
+                    break
+                else:
+                    input('press <Enter> to return...')
+                    print('----------------------------')
+                    break
+            else:
+                logger.error('there is no Cinema.xml in work dir')
+                input('press <Enter> to return...')
+                print('----------------------------')
+                break
         elif choice == '3':
-            logger.debug('Back to the main menu')
+            logger.debug('back to the main menu')
+            print('----------------------------')
             break
         else:
             logger.error('incorrect input, try again')
-            logger.info('************************************')
+            print('----------------------------')
 
 
