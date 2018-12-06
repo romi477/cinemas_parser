@@ -52,7 +52,7 @@ def create_stat(xml_dict_list):
 
 @endless_cycle
 @check_input_date
-def get_time(inp_date):
+def get_time(inp_date, def_date, key):
     return f'20{inp_date[4:]}/{inp_date[2:4]}/{inp_date[:2]}'
 
 def create_activ(cinema_dict):

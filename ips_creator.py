@@ -1,25 +1,12 @@
 import subprocess
 import xml.etree.ElementTree as ET
-import shutil
 import os
 import time
 import logging
-from utils import check_input_date, endless_cycle
+from utils import check_input_date, endless_cycle, copy_file
 
 
 logger = logging.getLogger('sccscript.ipscreator')
-
-def copy_registry_file(registry_file):
-    try:
-        shutil.copy2(registry_file, 'CinemaSettings.xml')
-    except FileNotFoundError:
-        logger.error(r'ReportDir\systeminfo.xmlb.xml has not been found')
-        return
-    except IOError:
-        logger.error(r'ReportDir\systeminfo.xmlb.xml has not been copied')
-        return
-    logger.info(r'ReportDir\systeminfo.xmlb.xml has been copied')
-    return True
 
 def get_marker(reporter_file):
     try:
@@ -55,11 +42,10 @@ def set_tag_to_cinemasettings(tag, atr, value):
 
 @endless_cycle
 @check_input_date
-def input_date_to_seconds(inp_date):
+def input_date_to_seconds(inp_date, def_date, key):
     struct_time = (int('20' + inp_date[4:]), int(inp_date[2:4]), int(inp_date[:2]), 0, 0, 0, 0, 0, 0)
     tm = time.mktime(struct_time)
     return int(tm) + 62135694000
-
 
 def get_data_from_xmls(cmd):
     logger.debug('getting data from xmls has been started')
@@ -116,7 +102,8 @@ def main_ips_creator():
             print()
             registry_file = r'ReportDir\systeminfo.xmlb.xml'
             reporter_file = r'ReportDir\reporter.log'
-            if copy_registry_file(registry_file):
+            abs_path = os.path.abspath(registry_file)
+            if copy_file(abs_path, 'CinemaSettings.xml'):
                 marker = get_marker(reporter_file)
             else:
                 input('press <Enter> to return...')
@@ -143,6 +130,7 @@ def main_ips_creator():
 
         if os.path.exists('Cinema.xml') and os.path.exists('CinemaSettings.xml'):
             regdata_cmd = r'Tools\ips_creator\prepareRegData.bat'
+            print()
             data_from_xmls = get_data_from_xmls(regdata_cmd)
             if data_from_xmls:
                 create_payload(**data_from_xmls)

@@ -6,16 +6,16 @@ import shutil
 import glob
 import logging
 from pprint import pprint
-from utils import check_dict_key
+from utils import copy_file
 # from msvcrt import getch
 
 
 logger = logging.getLogger('sccscript.unpackreport')
 
-@check_dict_key
-def parse_string(phrase, line):
-    return ' '.join((line.split(']')[-1].split())) if phrase in line else None
-
+def parse_string(phrase, line, dct, key):
+    if phrase in line:
+        dct[key] = ' '.join((line.split(']')[-1].split()))
+    return dct
 
 def find_info_in_reporter():
     try:
@@ -51,8 +51,6 @@ def find_info_in_reporter():
         parse_string('Host UNC clock time', line, dct=reporter_dict, key='host_unc')
     return reporter_dict
 
-
-
 def db_way(json_obj):
     iter_paths = glob.iglob(json_obj['path'], recursive=True)
     return [path for path in iter_paths if 'old' not in path]
@@ -74,29 +72,29 @@ def go_path(path):
     proc = r'explorer.exe /n, {}'.format(abs_path)
     subprocess.run(proc, shell=True)
 
-def copy_cinema_to_workdir(path):
-    abs_path = os.path.abspath(path).split(r'Cinema.xml')[0]
-    try:
-        shutil.copy2(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
-    except IOError:
-        logger.error('Cinema.xml has not been copied to the work dir')
-        return
-    try:
-        shutil.copy2(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
-    except IOError:
-        logger.error('CinemaSettings.xml has not been copied to the work dir')
-        return
-    logger.info('Cinema.xml has been copied to the work dir')
-    logger.info('CinemaSettings.xml has been copied to the work dir')
-
 def print_func(def_value, value):
-    print(value) if value else print(def_value)
+    if value:
+        split_list = value.split(': ')
+        try:
+            result_value = '{:22} {}'.format(split_list[0].strip()+':', split_list[1].strip())
+        except IndexError:
+            result_value = '{:22} {}'.format(split_list[0].strip()+':', None)
+        print(result_value)
+    else:
+        print(def_value)
+
+    # print(' '.join(value.split(': '))) if value else print(def_value)
 
 def main_find_uid():
     if os.path.exists('ReportDir'):
-        logger.info('<ReportDir> is deleting, please wait...')
-        shutil.rmtree('ReportDir', ignore_errors=True)
-
+        logger.info('<ReportDir> is being deleted, please wait...')
+        try:
+            shutil.rmtree('ReportDir')
+        except PermissionError:
+            logger.error('<Reportdir> has not been deleted')
+            input('press <Enter> to return...')
+            print('----------------------------')
+            return
     subprocess.run(r'Tools\unpack_report\start_unpack.bat', shell=False)
     print()
     try:
@@ -111,6 +109,17 @@ def main_find_uid():
     info_from_reporter = find_info_in_reporter()
 
     if info_from_reporter:
+        print('----------------------------')
+        print('  REPORTER INFO:')
+        print_func('Trial end date:        None', info_from_reporter['trial_date'])
+        print_func('Registry marker:       None', info_from_reporter['registry_marker'])
+        print_func('Dongle marker:         None', info_from_reporter['dongle_marker'])
+        print(f'Registry UID:          {info_from_reporter["registry_uid"]}')
+        print_func('SCCFM version:         None', info_from_reporter['sccfm_version'])
+        print_func('RTC UNC clock time:    None', info_from_reporter['rtc_unc'])
+        print_func('HOST UNC clock time:   None', info_from_reporter['host_unc'])
+        print(f'Dongle UID:            {info_from_reporter["dongle_uid"]}')
+
         if info_from_reporter['registry_uid'] and info_from_reporter['dongle_uid']:
             if info_from_reporter['registry_uid'] == info_from_reporter['dongle_uid']:
                 list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
@@ -136,26 +145,18 @@ def main_find_uid():
         return
 
     if list_paths_in_db:
-        print('----------------------------')
-        print('  REPORTER INFO:')
-        print_func('Trial date:', info_from_reporter['trial_date'])
-        print_func('Registry marker:', info_from_reporter['registry_marker'])
-        print_func('Dongle marker:', info_from_reporter['dongle_marker'])
-        print(f'Registry UID: {info_from_reporter["registry_uid"]}')
-        print_func('SCCFM version:', info_from_reporter['sccfm_version'])
-        print_func('RTC UNC clock time:', info_from_reporter['rtc_unc'])
-        print_func('HOST UNC clock time:', info_from_reporter['host_unc'])
-        print(f'Dongle UID: {info_from_reporter["dongle_uid"]}')
         print('  FOUND PATHS:')
         pprint(list_paths_in_db)
         print('----------------------------')
         input('press <Enter> to return...')
 
         if len(list_paths_in_db) == 1:
-            copy_cinema_to_workdir(list_paths_in_db[0])
+            abs_path = os.path.abspath(list_paths_in_db[0]).split(r'Cinema.xml')[0]
+            copy_file(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
+            copy_file(os.path.join(abs_path, r'CinemaSettinggs.xml'), 'CinemaSettings.xml')
             print('----------------------------')
         else:
-            logger.warning('more then one UID exist in database')
+            logger.warning('more than one UID exists in database')
             logger.warning('xmls have not been copied to the work dir')
             print('----------------------------')
 

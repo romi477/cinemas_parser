@@ -1,15 +1,10 @@
 from re import fullmatch
 import subprocess
+import shutil
 import logging
 
-logger = logging.getLogger('sccscript.utils')
 
-def check_dict_key(func):
-    def wrapper(*args, **kwargs):
-        result = func(*args, **kwargs)
-        if result:
-            kwargs['dct'][kwargs['key']] = result
-    return wrapper
+logger = logging.getLogger('sccscript.utils')
 
 def check_input_date(func):
     def wrapper(*args, **kwargs):
@@ -35,6 +30,22 @@ def endless_cycle(func):
             else:
                 kwargs['inp_date'] = input(f'enter {kwargs["key"]} date again: ')
     return wrapper
+
+def copy_file(get_file, set_file):
+    try:
+        shutil.copy2(get_file, set_file)
+    except FileNotFoundError:
+        logger.error(f'{get_file} has not been found')
+        input('press <Enter> to return...')
+        print('----------------------------')
+        return
+    except IOError:
+        logger.error(f'{get_file} has not been copied')
+        input('press <Enter> to return...')
+        print('----------------------------')
+        return
+    logger.info(f'{get_file} has been copied to the work dir like {set_file}')
+    return True
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=False)
