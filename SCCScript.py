@@ -31,7 +31,7 @@ logger.addHandler(ch2)
 
 
 def main():
-    logger.debug('--- Main log start ---')
+    logger.debug('--- Main log has been started ---')
 
     while True:
         print("""
@@ -42,29 +42,35 @@ def main():
               """)
         choice = input('your choice: ')
         if choice == '1':
-            logger.debug('-- unpack report start --')
+            logger.debug('-- unpack-report has been started')
             main_find_uid()
-            logger.debug('-- unpack report stop --')
+            logger.debug('-- unpack-report has been stopped')
+            print('----------------------------')
+            print('----------------------------')
 
         elif choice == '2':
-            logger.debug('-- create ips start --')
+            logger.debug('-- create-ips has been started')
             main_ips_creator()
-            logger.debug('-- create ips stop --')
+            logger.debug('-- create-ips has been stopped')
+            print('----------------------------')
+            print('----------------------------')
 
         elif choice == '3':
-            logger.debug('-- activ-stat start --')
+            logger.debug('-- activ-stat has been started')
             main_create_activstat()
-            logger.debug('-- activ-stat stop --')
+            logger.debug('-- activ-stat has been stopped')
+            print('----------------------------')
+            print('----------------------------')
 
         elif choice == '4':
             logger.info('Quit')
             break
 
         else:
-            logger.error('incorrect input, try again')
+            logger.error('Incorrect input, try again')
             print('----------------------------')
 
-    logger.debug('--- Main log stop ---\n')
+    logger.debug('--- Main log has been stoped ---\n')
 
 if __name__ == '__main__':
     main()

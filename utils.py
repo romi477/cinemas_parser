@@ -14,10 +14,10 @@ def check_input_date(func):
             else:
                 logger.error(f'Enter {kwargs["key"]} date as <%d%m%y>, for example: 010199,\n'
                               'or press <Enter> to set default date ...')
-                print('------------------------------------------------------------\n')
+                print('----------------------------\n')
                 return
         else:
-            logger.debug(f'default value of {kwargs["key"]} date')
+            logger.debug(f'Default value of {kwargs["key"]} date')
             return kwargs['def_date']
     return wrapper
 
@@ -28,7 +28,7 @@ def endless_cycle(func):
             if result:
                 return result
             else:
-                kwargs['inp_date'] = input(f'enter {kwargs["key"]} date again: ')
+                kwargs['inp_date'] = input(f'{kwargs["key"]} date: ')
     return wrapper
 
 def copy_file(get_file, set_file):
@@ -36,15 +36,13 @@ def copy_file(get_file, set_file):
         shutil.copy2(get_file, set_file)
     except FileNotFoundError:
         logger.error(f'{get_file} has not been found')
-        input('press <Enter> to return...')
-        print('----------------------------')
+        input('Press <Enter> to return...')
         return
     except IOError:
         logger.error(f'{get_file} has not been copied')
-        input('press <Enter> to return...')
-        print('----------------------------')
+        input('Press <Enter> to return...')
         return
-    logger.info(f'{get_file} has been copied to the work dir like {set_file}')
+    logger.info(f'{get_file} has been copied to the work dir as {set_file}')
     return True
 
 def sign_compress(cmd, compress):
@@ -57,8 +55,6 @@ def sign_compress(cmd, compress):
         else:
             logger.error(f'{compress} - FAIL')
             input('press <Enter> to return...')
-            print('----------------------------')
     else:
         logger.error(f'{cmd} - FAIL')
-        input('press <Enter> to return...')
-        print('----------------------------')
+        input('Press <Enter> to return...')

@@ -30,7 +30,7 @@ def evaluate_path(pth):
         return get_xml_data_dict(pth)
     if dir_name.startswith('-'):
         logger.info(f'{pth} has been skipped')
-        return None
+        return
     else:
         return get_xml_data_dict(pth)
 
@@ -44,7 +44,7 @@ def create_stat(xml_dict_list):
     root = ET.Element('StatisticsExportKey')
     for xml_dict in xml_dict_list:
         root.append(create_single_stat(xml_dict))
-        logger.info(f'Statistics for {xml_dict["title"]} <{xml_dict["uid"]}> has been created')
+        logger.info(f'Statistic for {xml_dict["title"]} <{xml_dict["uid"]}> has been created')
     tree = ET.ElementTree(root)
     with open('Statistics.key.xml', 'wb') as f:
         tree.write(f)
@@ -81,11 +81,12 @@ def main_create_activstat():
     while True:
         print("""
         <-- 
-            1. Create statistics for all xmls in <!Cinemas>
-            2. Create statistics & activation for Cinema.xml in work dir
+            1. Create statistic for all xmls in <!Cinemas>
+            2. Create statistic & activation for Cinema.xml in work dir
             3. Main menu
               """)
         choice = input('your choice: ')
+
         if choice == '1':
             subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
             print()
@@ -95,17 +96,14 @@ def main_create_activstat():
                 if xmls_data_list:
                     create_stat(xmls_data_list)
                     sign_compress(stat_cmd, compress_stat)
-                    print('----------------------------')
                     break
                 else:
-                    logger.warning('all xmls were skipped')
-                    input('press <Enter> to return...')
-                    print('----------------------------')
+                    logger.warning('All xmls have been skipped')
+                    input('Press <Enter> to return...')
                     break
             else:
-                logger.error('there are no xmls in <!Cinemas>')
-                input('press <Enter> to return...')
-                print('----------------------------')
+                logger.error('There are no xmls in <!Cinemas>')
+                input('Press <Enter> to return...')
                 break
 
         elif choice == '2':
@@ -121,20 +119,18 @@ def main_create_activstat():
                     sign_compress(stat_cmd, compress_stat)
                     break
                 else:
-                    input('press <Enter> to return...')
-                    print('----------------------------')
+                    input('Press <Enter> to return...')
                     break
             else:
-                logger.error('there is no Cinema.xml in work dir')
-                input('press <Enter> to return...')
-                print('----------------------------')
+                logger.error('There is no Cinema.xml in work dir')
+                input('Press <Enter> to return...')
                 break
+
         elif choice == '3':
-            logger.debug('back to the main menu')
-            print('----------------------------')
+            logger.debug('Back to main menu')
             break
         else:
-            logger.error('incorrect input, try again')
+            logger.error('Incorrect input, try again')
             print('----------------------------')
 
 

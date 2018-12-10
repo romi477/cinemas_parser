@@ -1,7 +1,7 @@
 import subprocess
 import os
 import json
-import re
+from re import search
 import shutil
 import glob
 import logging
@@ -36,7 +36,7 @@ def find_info_in_reporter():
         ]
     )
     for line in lines:
-        uid = re.search(r'\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w', line)
+        uid = search(r'\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w', line)
         if uid:
             if 'Instance UID' in line:
                 reporter_dict['registry_uid'] = uid.group(0)
@@ -56,12 +56,12 @@ def db_way(json_obj):
     return [path for path in iter_paths if 'old' not in path]
 
 def find_uid_in_db(paths_list, uid):
-    logger.info('finding UID in database, please wait...')
+    logger.info('Finding UID in database, please wait...')
     uid_list_from_db = []
     for path in paths_list:
         with open(path, 'r') as file:
             read_obj = file.read()
-        uid_tmp = re.search(uid, read_obj)
+        uid_tmp = search(uid, read_obj)
         if uid_tmp:
             uid_list_from_db.append(path)
     return uid_list_from_db
@@ -83,8 +83,6 @@ def print_func(def_value, value):
     else:
         print(def_value)
 
-    # print(' '.join(value.split(': '))) if value else print(def_value)
-
 def main_find_uid():
     if os.path.exists('ReportDir'):
         logger.info('<ReportDir> is being deleted, please wait...')
@@ -92,8 +90,7 @@ def main_find_uid():
             shutil.rmtree('ReportDir')
         except PermissionError:
             logger.error('<Reportdir> has not been deleted')
-            input('press <Enter> to return...')
-            print('----------------------------')
+            input('Press <Enter> to return...')
             return
     subprocess.run(r'Tools\unpack_report\start_unpack.bat', shell=False)
     print()
@@ -102,8 +99,7 @@ def main_find_uid():
             json_obj = json.load(file)
     except FileNotFoundError:
         logger.error('config.json has not been found in work dir!!!')
-        input('press <Enter> to return...')
-        print('----------------------------')
+        input('Press <Enter> to return...')
         return
     paths_list = db_way(json_obj)
     info_from_reporter = find_info_in_reporter()
@@ -124,9 +120,8 @@ def main_find_uid():
             if info_from_reporter['registry_uid'] == info_from_reporter['dongle_uid']:
                 list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
             else:
-                logger.warning('dongle UID is not equal registry UID !!!')
-                input('press <Enter> to return...')
-                print('----------------------------')
+                logger.warning('Dongle UID is not equal registry UID !!!')
+                input('Press <Enter> to return...')
                 return
         else:
             if info_from_reporter['dongle_uid']:
@@ -134,34 +129,28 @@ def main_find_uid():
             elif info_from_reporter['registry_uid']:
                 list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['registry_uid'])
             else:
-                logger.warning('none UID has not been found in ReportDir/reporter.log')
-                input('press <Enter> to return...')
-                print('----------------------------')
+                logger.warning('None UID has been found in ReportDir/reporter.log')
+                input('Press <Enter> to return...')
                 return
     else:
-        logger.error(r'ReportDir\reporter.log not found')
-        input('press <Enter> to return...')
-        print('----------------------------')
+        logger.error(r'ReportDir\reporter.log  has not been found')
+        input('Press <Enter> to return...')
         return
 
     if list_paths_in_db:
         print('  FOUND PATHS:')
         pprint(list_paths_in_db)
-        print('----------------------------')
-        input('press <Enter> to return...')
+        input('Press <Enter> to return...')
 
         if len(list_paths_in_db) == 1:
             abs_path = os.path.abspath(list_paths_in_db[0]).split(r'Cinema.xml')[0]
             copy_file(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
-            copy_file(os.path.join(abs_path, r'CinemaSettinggs.xml'), 'CinemaSettings.xml')
-            print('----------------------------')
+            copy_file(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
         else:
-            logger.warning('more than one UID exists in database')
-            logger.warning('xmls have not been copied to the work dir')
-            print('----------------------------')
+            logger.warning('More than one UID exists in database')
+            logger.warning('Xmls have not been copied to the work dir')
 
         for path in list_paths_in_db:
             go_path(path)
-            print('----------------------------')
 
 
