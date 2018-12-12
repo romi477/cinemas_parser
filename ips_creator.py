@@ -52,7 +52,7 @@ def set_tag_to_cinemasettings(tag, atr, value):
 def input_date_to_seconds(inp_date, def_date, key):
     struct_time = (int('20' + inp_date[4:]), int(inp_date[2:4]), int(inp_date[:2]), 0, 0, 0, 0, 0, 0)
     tm = time.mktime(struct_time)
-    return int(tm) + 62135694000
+    return int(tm) - time.timezone + 62135694000
 
 def get_data_from_xmls(cmd):
     logger.debug('Getting data from xmls has been started')
@@ -63,11 +63,11 @@ def get_data_from_xmls(cmd):
     )
     validity = input_date_to_seconds(
         inp_date=input('validity date: '),
-        def_date=time.time() + 86400 + 62135694000,
+        def_date=time.time() - time.timezone + 75600 + 62135694000,
         key='validity'
     )
     if not set_tag_to_cinemasettings('TR', 'D', activation):
-        return False
+        return
     subprocess.run(cmd, shell=False)
     tree = ET.parse('Cinema.xml')
     root = tree.getroot()
@@ -77,9 +77,9 @@ def get_data_from_xmls(cmd):
             regdata = data.read()
     except FileNotFoundError:
         logger.error(r'Tools\ips_creator\regdata.b64 not found')
-        return
-    logger.info('All data from xmls has been taken')
-    return {'validity': int(validity), 'uid': uid, 'regdata': regdata}
+    else:
+        logger.info('All data from xmls has been taken')
+        return {'validity': int(validity), 'uid': uid, 'regdata': regdata}
 
 def create_payload(validity, uid, regdata):
     root = ET.Element('IPSPayload')

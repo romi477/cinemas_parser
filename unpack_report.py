@@ -22,6 +22,7 @@ def find_info_in_reporter():
         with open(r'ReportDir\reporter.log', 'r') as file:
             lines = file.readlines()
     except FileNotFoundError:
+        logger.error(r'ReportDir\reporter.log  has not been found')
         return
     reporter_dict = dict.fromkeys(
         [
@@ -76,9 +77,9 @@ def print_func(def_value, value):
     if value:
         split_list = value.split(': ')
         try:
-            result_value = '{:22} {}'.format(split_list[0].strip()+':', split_list[1].strip())
+            result_value = '{:22} {}'.format(split_list[0].strip() + ':', split_list[1].strip())
         except IndexError:
-            result_value = '{:22} {}'.format(split_list[0].strip()+':', None)
+            result_value = '{:22} {}'.format(split_list[0].strip() + ':', None)
         print(result_value)
     else:
         print(def_value)
@@ -116,41 +117,52 @@ def main_find_uid():
         print_func('HOST UNC clock time:   None', info_from_reporter['host_unc'])
         print(f'Dongle UID:            {info_from_reporter["dongle_uid"]}')
 
-        if info_from_reporter['registry_uid'] and info_from_reporter['dongle_uid']:
-            if info_from_reporter['registry_uid'] == info_from_reporter['dongle_uid']:
-                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
+        inp = input('Press <Enter> to find UID in database')
+        if inp == '':
+            if info_from_reporter['registry_uid'] and info_from_reporter['dongle_uid']:
+                if info_from_reporter['registry_uid'] == info_from_reporter['dongle_uid']:
+                    list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
+                else:
+                    logger.warning('Dongle UID is not equal registry UID !!!')
+                    input('Press <Enter> to return...')
+                    return
             else:
-                logger.warning('Dongle UID is not equal registry UID !!!')
-                input('Press <Enter> to return...')
-                return
+                if info_from_reporter['dongle_uid']:
+                    list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
+                elif info_from_reporter['registry_uid']:
+                    list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['registry_uid'])
+                else:
+                    logger.warning('None UID has been found in ReportDir/reporter.log')
+                    input('Press <Enter> to return...')
+                    return
+
+            if list_paths_in_db:
+                print('  FOUND PATHS:')
+                pprint(list_paths_in_db)
+                inp = input('Press <Enter> to copy files to work dir')
+                if inp == '':
+                    if len(list_paths_in_db) == 1:
+                        abs_path = os.path.abspath(list_paths_in_db[0]).split(r'Cinema.xml')[0]
+                        copy_file(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
+                        copy_file(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
+                    else:
+                        logger.warning('More than one UID exists in database')
+                        logger.warning('Xmls have not been copied to the work dir')
+                        return
+                else:
+                    logger.info('Copying files has been skipped')
+                inp = input('Press <Enter> to go path')
+                if inp == '':
+                    for path in list_paths_in_db:
+                        go_path(path)
+                else:
+                    logger.info('The transition has been skipped')
         else:
-            if info_from_reporter['dongle_uid']:
-                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['dongle_uid'])
-            elif info_from_reporter['registry_uid']:
-                list_paths_in_db = find_uid_in_db(paths_list, info_from_reporter['registry_uid'])
-            else:
-                logger.warning('None UID has been found in ReportDir/reporter.log')
-                input('Press <Enter> to return...')
-                return
+            logger.info('Finding UID has been skipped')
     else:
-        logger.error(r'ReportDir\reporter.log  has not been found')
-        input('Press <Enter> to return...')
-        return
-
-    if list_paths_in_db:
-        print('  FOUND PATHS:')
-        pprint(list_paths_in_db)
         input('Press <Enter> to return...')
 
-        if len(list_paths_in_db) == 1:
-            abs_path = os.path.abspath(list_paths_in_db[0]).split(r'Cinema.xml')[0]
-            copy_file(os.path.join(abs_path, r'Cinema.xml'), 'Cinema.xml')
-            copy_file(os.path.join(abs_path, r'CinemaSettings.xml'), 'CinemaSettings.xml')
-        else:
-            logger.warning('More than one UID exists in database')
-            logger.warning('Xmls have not been copied to the work dir')
 
-        for path in list_paths_in_db:
-            go_path(path)
+
 
 

@@ -37,13 +37,12 @@ def copy_file(get_file, set_file):
     except FileNotFoundError:
         logger.error(f'{get_file} has not been found')
         input('Press <Enter> to return...')
-        return
     except IOError:
         logger.error(f'{get_file} has not been copied')
         input('Press <Enter> to return...')
-        return
-    logger.info(f'{get_file} has been copied to the work dir as {set_file}')
-    return True
+    else:
+        logger.info(f'{get_file}\n       has been copied to the work dir as {set_file}')
+        return True
 
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=False)
