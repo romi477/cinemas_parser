@@ -105,25 +105,33 @@ def main_ips_creator():
             subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
             break
         elif choice == '2':
-            subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+            logger.warning('Make sure that right Cinema.xml has been copied to the work dir')
             print()
-            registry_file = r'ReportDir\systeminfo.xmlb.xml'
-            reporter_file = r'ReportDir\reporter.log'
-            abs_path = os.path.abspath(registry_file)
-            if copy_file(abs_path, 'CinemaSettings.xml'):
-                marker = get_marker(reporter_file)
-            else:
-                input('Press <Enter> to return...')
-                return
-            if marker:
-                marker_seconds = get_seconds_from_marker(marker)
-                set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
-                if not set_marker:
+            inp = input('Press <Enter> to continue or <any_key> + <Enter> to go to Main menu')
+            if inp == '':
+                logger.info('The operation has been continued')
+                subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+                print()
+                registry_file = r'ReportDir\systeminfo.xmlb.xml'
+                reporter_file = r'ReportDir\reporter.log'
+                abs_path = os.path.abspath(registry_file)
+                if copy_file(abs_path, 'CinemaSettings.xml'):
+                    marker = get_marker(reporter_file)
+                else:
                     input('Press <Enter> to return...')
                     return
-                break
+                if marker:
+                    marker_seconds = get_seconds_from_marker(marker)
+                    set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
+                    if not set_marker:
+                        input('Press <Enter> to return...')
+                        return
+                    break
+                else:
+                    input('Press <Enter> to return...')
+                    return
             else:
-                input('Press <Enter> to return...')
+                logger.info('The operation has been skipped')
                 return
         elif choice == '3':
             logger.debug('Back to main menu')

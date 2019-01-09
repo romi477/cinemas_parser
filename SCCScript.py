@@ -42,23 +42,23 @@ def main():
               """)
         choice = input('your choice: ')
         if choice == '1':
-            logger.debug('-- unpack-report has been started')
+            logger.debug('-- <unpack-report> function has been started')
             main_find_uid()
-            logger.debug('-- unpack-report has been stopped')
+            logger.debug('-- <unpack-report> has been finished')
             print('----------------------------')
             print('----------------------------')
 
         elif choice == '2':
-            logger.debug('-- create-ips has been started')
+            logger.debug('-- <create-ips> function has been started')
             main_ips_creator()
-            logger.debug('-- create-ips has been stopped')
+            logger.debug('-- <create-ips> has been finished')
             print('----------------------------')
             print('----------------------------')
 
         elif choice == '3':
-            logger.debug('-- activ-stat has been started')
+            logger.debug('-- <activ-stat> function has been started')
             main_create_activstat()
-            logger.debug('-- activ-stat has been stopped')
+            logger.debug('-- <activ-stat> has been finished')
             print('----------------------------')
             print('----------------------------')
 
@@ -70,7 +70,7 @@ def main():
             logger.error('Incorrect input, try again')
             print('----------------------------')
 
-    logger.debug('--- Main log has been stoped ---\n')
+    logger.debug('--- Main log has been stopped ---\n')
 
 if __name__ == '__main__':
     main()
