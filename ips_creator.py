@@ -68,7 +68,7 @@ def get_data_from_xmls(cmd):
     )
     if not set_tag_to_cinemasettings('TR', 'D', activation):
         return
-    subprocess.run(cmd, shell=False)
+    subprocess.run(cmd)
     tree = ET.parse('Cinema.xml')
     root = tree.getroot()
     uid = root.attrib['UniqueId']
@@ -102,15 +102,15 @@ def main_ips_creator():
               """)
         choice = input('your choice: ')
         if choice == '1':
-            subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+            subprocess.run(r'Tools\ips_creator\preautorun.bat')
             break
         elif choice == '2':
             logger.warning('Make sure that right Cinema.xml has been copied to the work dir')
             print()
-            inp = input('Press <Enter> to continue or <any_key> + <Enter> to go to Main menu')
+            inp = input('Press <Enter> to continue or <any_key + Enter> to go to the Main menu')
             if inp == '':
                 logger.info('The operation has been continued')
-                subprocess.run(r'Tools\ips_creator\preautorun.bat', shell=False)
+                subprocess.run(r'Tools\ips_creator\preautorun.bat')
                 print()
                 registry_file = r'ReportDir\systeminfo.xmlb.xml'
                 reporter_file = r'ReportDir\reporter.log'
@@ -147,7 +147,7 @@ def main_ips_creator():
         if data_from_xmls:
             create_payload(**data_from_xmls)
             payload_cmd = r'Tools\ips_creator\preparePayload.bat'
-            subprocess.run(payload_cmd, shell=False)
+            subprocess.run(payload_cmd)
             logger.info(f'IPS.exe for <{data_from_xmls["uid"]}> was created')
         else:
             logger.error('Data from xmls has not been taken')

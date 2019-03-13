@@ -88,7 +88,7 @@ def main_create_activstat():
         choice = input('your choice: ')
 
         if choice == '1':
-            subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
+            subprocess.run(r'Tools\activ_stat\preautorun.bat')
             print()
             paths_list = glob.iglob(r'!Cinemas\*\*\Cinema.xml')
             if paths_list:
@@ -107,7 +107,7 @@ def main_create_activstat():
                 break
 
         elif choice == '2':
-            subprocess.run(r'Tools\activ_stat\preautorun.bat', shell=False)
+            subprocess.run(r'Tools\activ_stat\preautorun.bat')
             print()
             xml_file = 'Cinema.xml'
             if os.path.exists(xml_file):

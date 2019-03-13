@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import datetime
-from unpack_report import main_find_uid
+from unpack_report import main_find_uid, main_find_uid_inner
 from ips_creator import main_ips_creator
 from create_activ_stat import main_create_activstat
 
@@ -65,6 +65,11 @@ def main():
         elif choice == '4':
             logger.info('Quit')
             break
+
+        elif choice == 'r':
+            logger.info('-- <reported-mod> has been started--')
+            main_find_uid_inner()
+            logger.info('-- <reported-mod> has been finished--')
 
         else:
             logger.error('Incorrect input, try again')

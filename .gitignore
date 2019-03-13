@@ -15,6 +15,10 @@ third.py
 fourth.py
 IPS.exe
 SCC2Report.pak
+draft.py
+draft2.py
+draft3.py
 ReportDir/
 __pycache__/
-
+*.pak
+content.txt

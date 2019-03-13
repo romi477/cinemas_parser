@@ -1,3 +1,8 @@
 {
-   "path": "..\\02_XMLs\\*\\*\\**\\Cinema.xml"
+   "db_path": "..\\02_XMLs",
+   "content_dirs": [
+     "ReportDir\\Files\\Data\\movies",
+     "ReportDir\\Files\\Data\\games",
+     "ReportDir\\Files\\Data\\vrgames"
+   ]
 }

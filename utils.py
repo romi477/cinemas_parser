@@ -57,3 +57,4 @@ def sign_compress(cmd, compress):
     else:
         logger.error(f'{cmd} - FAIL')
         input('Press <Enter> to return...')
+
