@@ -68,9 +68,7 @@ def find_uid_in_db(paths_list, uid):
     return uid_list_from_db
 
 def go_path(path):
-    abs_path = os.path.abspath(path)
-    abs_path = abs_path.split(r'\Cinema.xml')[0]
-    proc = r'explorer.exe /n, {}'.format(abs_path)
+    proc = r'explorer.exe /n, {}'.format(path)
     subprocess.run(proc, shell=True)
 
 def print_func(def_value, value):
@@ -189,9 +187,9 @@ def main_find_uid_inner():
                     except KeyError:
                         path_xml = uid_list_from_db['Registry_UID']
                     if len(path_xml) == 1:
+                        abs_path_xml = os.path.abspath(path_xml[0]).split(r'Cinema.xml')[0]
                         choice = input('Press <Enter> to copy files to the work dir')
                         if choice == '':
-                            abs_path_xml = os.path.abspath(path_xml[0]).split(r'Cinema.xml')[0]
                             copy_file(os.path.join(abs_path_xml, r'Cinema.xml'), 'Cinema.xml')
                             copy_file(os.path.join(abs_path_xml, r'CinemaSettings.xml'), 'CinemaSettings.xml')
                         else:
@@ -199,8 +197,7 @@ def main_find_uid_inner():
 
                         choice = input('Press <Enter> to go to the path')
                         if choice == '':
-                            for path in uid_list_from_db:
-                                go_path(path)
+                            go_path(abs_path_xml)
                     else:
                         logger.warning('More than one UID exists in database')
                         print('---------------------------------------')
