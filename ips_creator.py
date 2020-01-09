@@ -1,13 +1,14 @@
-import subprocess
-import xml.etree.ElementTree as ET
 import os
 import time
 import logging
+import subprocess
 from re import search
+import xml.etree.ElementTree as ET
 from utils import check_input_date, endless_cycle, copy_file
 
 
 logger = logging.getLogger('sccscript.ipscreator')
+
 
 def get_marker(reporter_file):
     try:
@@ -18,7 +19,7 @@ def get_marker(reporter_file):
         return
     for line in lines:
         if 'Dongle marker' in line:
-            marker = search(r' \d\d\d\d/\d\d/\d\d \d\d:\d\d:\d\d', line)
+            marker = search(r' \d{4}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}', line)
             if marker:
                 return marker.group(0)[1:] if marker.group(0)[1:] != '1970/01/01 00:00:00' else '1970/01/01 03:00:00'
             else:
@@ -27,6 +28,7 @@ def get_marker(reporter_file):
     logger.error(r'Dongle marker in ReportDir\reporter.log has not been found')
     return
 
+
 def get_seconds_from_marker(marker):
     arg1 = marker.split()[0].split('/')
     arg2 = marker.split()[1].split(':')
@@ -34,6 +36,7 @@ def get_seconds_from_marker(marker):
     tm = time.mktime(struct_time)
     logger.info('Seconds from marker have been taken')
     return int(tm) + 62135694000
+
 
 def set_tag_to_cinemasettings(tag, atr, value):
     try:
@@ -47,12 +50,14 @@ def set_tag_to_cinemasettings(tag, atr, value):
         logger.info(f'<{tag}> {atr} = {value} </{tag}> has been set to CinemaSettings.xml ')
         return True
 
+
 @endless_cycle
 @check_input_date
-def input_date_to_seconds(inp_date, def_date, key):
+def input_date_to_seconds(inp_date, **kwargs):
     struct_time = (int('20' + inp_date[4:]), int(inp_date[2:4]), int(inp_date[:2]), 0, 0, 0, 0, 0, 0)
     tm = time.mktime(struct_time)
     return int(tm) - time.timezone + 62135694000
+
 
 def get_data_from_xmls(cmd):
     logger.debug('Getting data from xmls has been started')
@@ -80,6 +85,7 @@ def get_data_from_xmls(cmd):
     else:
         logger.info('All data from xmls has been taken')
         return {'validity': int(validity), 'uid': uid, 'regdata': regdata}
+
 
 def create_payload(validity, uid, regdata):
     root = ET.Element('IPSPayload')
@@ -114,27 +120,31 @@ def main_ips_creator():
                 print()
                 registry_file = r'ReportDir\systeminfo.xmlb.xml'
                 reporter_file = r'ReportDir\reporter.log'
-                abs_path = os.path.abspath(registry_file)
-                if copy_file(abs_path, 'CinemaSettings.xml'):
-                    marker = get_marker(reporter_file)
-                else:
-                    input('Press <Enter> to return...')
-                    return
-                if marker:
-                    marker_seconds = get_seconds_from_marker(marker)
-                    set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
-                    if not set_marker:
+                if os.path.exists(registry_file) and os.path.exists(reporter_file):
+                    abs_path = os.path.abspath(registry_file)
+                    if copy_file(abs_path, 'CinemaSettings.xml'):
+                        marker = get_marker(reporter_file)
+                    else:
                         input('Press <Enter> to return...')
                         return
-                    break
+                    if marker:
+                        marker_seconds = get_seconds_from_marker(marker)
+                        set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
+                        if not set_marker:
+                            input('Press <Enter> to return...')
+                            return
+                        break
+                    else:
+                        input('Press <Enter> to return...')
+                        return
                 else:
+                    logger.error('systeminfo.xmlb.xml or reporter.log not exists.')
                     input('Press <Enter> to return...')
                     return
             else:
                 logger.info('The operation has been skipped')
                 return
         elif choice == '3':
-            logger.debug('Back to main menu')
             return
         else:
             logger.error('Incorrect input, try again')

@@ -1,10 +1,19 @@
-from re import fullmatch
-import subprocess
+import os
+import glob
 import shutil
 import logging
+import subprocess
+from re import search
+from re import fullmatch
 
 
 logger = logging.getLogger('sccscript.utils')
+
+
+def go_path(path):
+    proc = r'explorer.exe /n, {}'.format(path)
+    subprocess.run(proc, shell=True)
+
 
 def check_input_date(func):
     def wrapper(*args, **kwargs):
@@ -21,6 +30,7 @@ def check_input_date(func):
             return kwargs['def_date']
     return wrapper
 
+
 def endless_cycle(func):
     def wrapper(*args, **kwargs):
         while True:
@@ -30,6 +40,7 @@ def endless_cycle(func):
             else:
                 kwargs['inp_date'] = input(f'{kwargs["key"]} date: ')
     return wrapper
+
 
 def copy_file(get_file, set_file):
     try:
@@ -44,6 +55,7 @@ def copy_file(get_file, set_file):
         logger.info(f'{get_file}\n       has been copied to the work dir as {set_file}')
         return True
 
+
 def sign_compress(cmd, compress):
     sign = subprocess.run(cmd, shell=False)
     if sign.returncode == 0:
@@ -57,4 +69,22 @@ def sign_compress(cmd, compress):
     else:
         logger.error(f'{cmd} - FAIL')
         input('Press <Enter> to return...')
+
+
+def db_way(config):
+    iter_list = config['db_path'] + '\\*\\*\\**\\Cinema.xml'
+    iter_paths = glob.iglob(iter_list, recursive=True)
+    return [path for path in iter_paths if os.path.sep + 'old' not in path]
+
+
+def find_string_in_db(paths_list, a_string):
+    logger.info(f'Finding "{a_string}" in database, please wait...')
+    uid_list_from_db = []
+    for path in paths_list:
+        with open(path, 'r') as file:
+            read_obj = file.read()
+        uid_tmp = search(a_string, read_obj)
+        if uid_tmp:
+            uid_list_from_db.append(os.path.abspath(path))
+    return uid_list_from_db
 

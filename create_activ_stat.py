@@ -1,12 +1,13 @@
-import subprocess
-import xml.etree.ElementTree as ET
 import os
 import glob
 import logging
+import subprocess
+import xml.etree.ElementTree as ET
 from utils import check_input_date, endless_cycle, sign_compress
 
 
 logger = logging.getLogger('sccscript.createactivstat')
+
 
 def get_xml_data_dict(file):
     try:
@@ -23,6 +24,7 @@ def get_xml_data_dict(file):
         owner = tree.find('OwnerPassword').attrib['Value']
     return {'title': title, 'uid': uid, 'owner': owner}
 
+
 def evaluate_path(pth):
     try:
         dir_name = pth.split(os.path.sep)[1]
@@ -34,11 +36,13 @@ def evaluate_path(pth):
     else:
         return get_xml_data_dict(pth)
 
+
 def create_single_stat(xml_dict):
     cinema = ET.Element('Cinema')
     cinema.set('Name', f'{xml_dict["title"]}-{xml_dict["owner"]}')
     cinema.set('UID', f'{xml_dict["uid"]}')
     return cinema
+
 
 def create_stat(xml_dict_list):
     root = ET.Element('StatisticsExportKey')
@@ -50,10 +54,12 @@ def create_stat(xml_dict_list):
         tree.write(f)
     logger.info(f'Statistics.key.xml has been written')
 
+
 @endless_cycle
 @check_input_date
 def get_time(inp_date, def_date, key):
     return f'20{inp_date[4:]}/{inp_date[2:4]}/{inp_date[:2]}'
+
 
 def create_activ(cinema_dict):
     format_date = get_time(
@@ -102,7 +108,7 @@ def main_create_activstat():
                     input('Press <Enter> to return...')
                     break
             else:
-                logger.error('There are no xmls in <!Cinemas>')
+                logger.error('There are no one xml in <!Cinemas>')
                 input('Press <Enter> to return...')
                 break
 
@@ -127,7 +133,6 @@ def main_create_activstat():
                 break
 
         elif choice == '3':
-            logger.debug('Back to main menu')
             break
         else:
             logger.error('Incorrect input, try again')

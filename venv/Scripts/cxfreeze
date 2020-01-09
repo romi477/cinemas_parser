@@ -1,6 +1,0 @@
-#!C:\Users\medvet\PycharmProjects\cinemas_parser\venv\Scripts\python.exe
-
-from cx_Freeze import main
-
-main()
-

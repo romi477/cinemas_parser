@@ -1,20 +1,23 @@
-import subprocess
 import os
-import json
-from re import search
-import shutil
 import glob
+import shutil
 import logging
-from pprint import pprint
+import pyexcel
+import subprocess
+from re import search
+from xml.dom import minidom
 import xml.etree.ElementTree as ET
-from utils import copy_file
+from utils import db_way, copy_file, find_string_in_db, go_path
+
 
 logger = logging.getLogger('sccscript.unpackreport')
+
 
 def parse_string(phrase, line, dct, key):
     if phrase in line:
         dct[key] = ' '.join((line.split(']')[-1].split()))
     return dct
+
 
 def find_info_in_reporter():
     try:
@@ -36,7 +39,7 @@ def find_info_in_reporter():
         ]
     )
     for line in lines:
-        uid = search(r'\w\w\w\w\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w-\w\w\w\w\w\w\w\w\w\w\w\w', line)
+        uid = search(r'\w{8}-\w{4}-\w{4}-\w{4}-\w{12}', line)
         if uid:
             if 'Instance UID' in line:
                 reporter_dict['registry_uid'] = uid.group(0)
@@ -51,25 +54,17 @@ def find_info_in_reporter():
         parse_string('Host UNC clock time', line, dct=reporter_dict, key='host_unc')
     return reporter_dict
 
-def db_way(config):
-    iter_list = config['db_path'] + '\\*\\*\\**\\Cinema.xml'
-    iter_paths = glob.iglob(iter_list, recursive=True)
-    return [path for path in iter_paths if 'old' not in path]
 
-def find_uid_in_db(paths_list, uid):
-    logger.info('Finding UID in database, please wait...')
-    uid_list_from_db = []
-    for path in paths_list:
-        with open(path, 'r') as file:
-            read_obj = file.read()
-        uid_tmp = search(uid, read_obj)
-        if uid_tmp:
-            uid_list_from_db.append(path)
-    return uid_list_from_db
+def print_dict(dct):
 
-def go_path(path):
-    proc = r'explorer.exe /n, {}'.format(path)
-    subprocess.run(proc, shell=True)
+    print('---------------------------------------')
+    print(f'{"":<16}FOUND PATHS:')
+    print()
+    for k, v in dct.items():
+        print(f'{k}:')
+        print('\n'.join(v))
+    print('---------------------------------------')
+
 
 def print_func(def_value, value):
     if value:
@@ -82,13 +77,6 @@ def print_func(def_value, value):
     else:
         print(def_value)
 
-def print_dict(dct):
-    print('---------------------------------------')
-    print(f'{"":<16}FOUND PATHS:')
-    for k, v in dct.items():
-        print(f'{k}:')
-        pprint(v)
-    print('---------------------------------------')
 
 def movie_parser(movie_pth):
     root = ET.parse(movie_pth).getroot()
@@ -97,7 +85,7 @@ def movie_parser(movie_pth):
         license = expired.get('Value')
         return license
     except AttributeError:
-        pass
+        return None
 
 
 def walk_pth(pth):
@@ -106,33 +94,24 @@ def walk_pth(pth):
     for idx, movie_pth in enumerate(iter_movies, 1):
         movie_license = movie_parser(movie_pth)
         mps = movie_pth.split(os.path.sep)
-        if movie_license:
-            print(f'{"/".join(mps[-3:-1]):<26} {idx}. {mps[-1].split(".")[-2]}: {movie_license}')
-            content_list.append(f'{"/".join(mps[-3:-1]):<26} {idx}. {mps[-1].split(".")[-2]}: {movie_license}')
-        else:
-            print(f'{"/".join(mps[-3:-1]):<26} {idx}. {mps[-1].split(".")[-2]}')
-            content_list.append(f'{"/".join(mps[-3:-1]):<26} {idx}. {mps[-1].split(".")[-2]}')
-    content_list.append('')
+        print(f'{"/".join(mps[-3:-1]):<26} {idx}. {mps[-1].split(".")[-2]:<23}{movie_license}')
+        content_list.append([f'{"/".join(mps[-3:-1])}', f'{idx}.', f'{mps[-1].split(".")[-2]}', f'{movie_license}'])
     return content_list
 
-def main_find_uid_inner():
+
+def main_find_uid_inner(config):
     if not os.path.exists('ReportDir'):
         logger.error('<ReportDir> does not exist!')
         logger.info('Make sure that SCC2Report.pak was unpacked at <ReportDir> directory!')
         return
-    try:
-        with open('config.json', 'r', encoding='utf8') as file:
-            config = json.load(file)
-    except FileNotFoundError:
-        logger.error('config.json has not been found in work dir!!!')
-        input('Press <Enter> to return...')
-        return
+
     paths_list = db_way(config)
     reporter_dict = find_info_in_reporter()
 
     if reporter_dict:
         print('---------------------------------------')
-        print(f'{"":<16}REPORTER INFO:')
+        print(f'{"":<16}REPORTER INFO')
+        print()
         print_func('Trial end date:        None', reporter_dict['trial_date'])
         print_func('Registry marker:       None', reporter_dict['registry_marker'])
         print_func('Dongle marker:         None', reporter_dict['dongle_marker'])
@@ -156,27 +135,27 @@ def main_find_uid_inner():
                 if reporter_dict['registry_uid'] and reporter_dict['dongle_uid']:
                     if reporter_dict['registry_uid'] == reporter_dict['dongle_uid']:
                         logger.info('Dongle UID is equal Registry UID')
-                        uid_list_from_db['Dongle_UID'] = find_uid_in_db(paths_list, reporter_dict['dongle_uid'])
+                        uid_list_from_db['Dongle_UID'] = find_string_in_db(paths_list, reporter_dict['dongle_uid'])
                     else:
-                        logger.warning('Dongle UID is not equal Registry UID !!!')
-                        uid_list_from_db['Dongle_UID'] = find_uid_in_db(paths_list, reporter_dict['dongle_uid'])
-                        uid_list_from_db['Registry_UID'] = find_uid_in_db(paths_list, reporter_dict['registry_uid'])
+                        logger.warning('Dongle UID is not equal Registry UID!')
+                        uid_list_from_db['Dongle_UID'] = find_string_in_db(paths_list, reporter_dict['dongle_uid'])
+                        uid_list_from_db['Registry_UID'] = find_string_in_db(paths_list, reporter_dict['registry_uid'])
                         print_dict(uid_list_from_db)
                         print('---------------------------------------')
                         continue
                 else:
                     if reporter_dict['dongle_uid']:
                         logger.warning('Only Dongle UID has been parsed from reporter.log')
-                        uid = find_uid_in_db(paths_list, reporter_dict['dongle_uid'])
+                        uid = find_string_in_db(paths_list, reporter_dict['dongle_uid'])
                         if uid:
                             uid_list_from_db['Dongle_UID'] = uid
                     elif reporter_dict['registry_uid']:
                         logger.warning('Only Registry UID has been parsed from reporter.log')
-                        uid = find_uid_in_db(paths_list, reporter_dict['registry_uid'])
+                        uid = find_string_in_db(paths_list, reporter_dict['registry_uid'])
                         if uid:
                             uid_list_from_db['Registry_UID'] = uid
                     else:
-                        logger.warning('None UID has been found in reporter.log')
+                        logger.warning('None of UID has been found in reporter.log')
                         print('---------------------------------------')
                         continue
 
@@ -195,7 +174,7 @@ def main_find_uid_inner():
                         else:
                             logger.info('Copying files has been skipped')
 
-                        choice = input('Press <Enter> to go to the path')
+                        choice = input('Press <Enter> to follow to the path')
                         if choice == '':
                             go_path(abs_path_xml)
                     else:
@@ -203,44 +182,96 @@ def main_find_uid_inner():
                         print('---------------------------------------')
                         continue
                 else:
-                    logger.warning('None UID has been found in Database')
+                    logger.warning('None of the required UID has been found in Database')
                     print('---------------------------------------')
                     continue
                 print('---------------------------------------')
 
             elif choice == '2':
                 print('---------------------------------------')
-                print(f'{"":<16}CONTENT:')
+                print(f'{"":<16}CONTENT')
+                print()
                 full_content_list = []
                 for pth in config['content_dirs']:
                     if os.path.exists(pth) and os.listdir(pth):
                         full_content_list.extend(walk_pth(pth))
+                print()
                 if full_content_list:
-                    with open('content.txt', 'w') as txt_file:
-                        for line in full_content_list:
-                            txt_file.write(line + '\n')
+                    inp = input('Export content to xls or xml: ')
+                    inp = inp.lower().split()
+                    if not inp:
+                        logger.info('Export has been skipped')
+                        return
+                    if not os.path.exists('content'):
+                        os.mkdir('content')
+
+                    uid = reporter_dict.get('registry_uid')
+                    cont_uid = uid if uid else reporter_dict.get('dongle_uid')
+                    print()
+                    for ext in inp:
+                        content_name = f'{cont_uid}.{ext}'
+                        if ext == 'xls':
+                            try:
+                                pyexcel.save_as(array=full_content_list, dest_file_name=os.path.join("content", f'content-{content_name}'))
+                                logger.info(f'File content/content-{content_name} has been successfully created')
+                            except Exception as ex:
+                                logger.error(ex)
+                                raise
+
+                        elif ext == 'xml':
+                            root = ET.Element('Cinema')
+                            root.set('TrackType', '2dof')
+                            root.set('Resolution', '...')
+                            root.set('Language', '...')
+
+                            content = ET.Element('Content')
+                            root.append(content)
+
+                            for record in full_content_list:
+                                movie = ET.SubElement(content, 'Movie')
+                                movie.set('Title', record[2])
+                                try:
+                                    movie.set('Licensed', record[3])
+                                except IndexError:
+                                    movie.set('Licensed', None)
+
+                            root_string = ET.tostring(root, encoding="unicode", method="xml")
+                            dom = minidom.parseString(root_string)
+                            dom.normalize()
+
+                            try:
+                                with open(os.path.join("content", f'template-{content_name}'), 'w') as file:
+                                    dom.writexml(file, addindent=" " * 4, newl="\n")
+                                logger.info(f'File content/template-{content_name} has been successfully created')
+                            except Exception as ex:
+                                logger.error(ex)
+                                raise
+
+                        else:
+                            logger.info(f'Incorrect extension *.{ext}')
                 else:
                     logger.warning('Content has not been found')
                 print('---------------------------------------')
+
             elif choice == '3':
                 break
     else:
         logger.warning('<Reporter info> has not been parsed')
 
 
-def main_find_uid():
+def main_find_uid(config):
     if os.path.exists('ReportDir'):
         logger.info('<ReportDir> is being deleted, please wait...')
         try:
             shutil.rmtree('ReportDir')
         except Exception as e:
             logger.error(e)
-            logger.error('Try to rename the directory <Reportdir>')
+            logger.error('Rename the directory <Reportdir> and try again')
             input('Press <Enter> to return...')
             return
     subprocess.run(r'Tools\unpack_report\start_unpack.bat')
     print()
-    main_find_uid_inner()
+    main_find_uid_inner(config)
 
 
 
