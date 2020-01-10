@@ -3,6 +3,7 @@ venv/
 build/
 logs/
 /!Cinemas/
+/!Cinemas_/
 Tools/
 Activation.xml.xml
 Activation.xml
@@ -18,9 +19,10 @@ SCC2Report.pak
 draft.py
 draft2.py
 draft3.py
-ReportDir/
-ReportDir_/
-ReportDir__/
+/ReportDir/
+/ReportDir_/
+/ReportDir__/
+/ReportDir___/
 __pycache__/
 *.pak
 content.txt
