@@ -23,7 +23,7 @@ def check_input_date(func):
             else:
                 logger.error(f'Enter {kwargs["key"]} date as <%d%m%y>, for example: 010199,\n'
                               'or press <Enter> to set default date ...')
-                print('----------------------------\n')
+                print('---------------------------------------\n')
                 return
         else:
             logger.debug(f'Default value of {kwargs["key"]} date')
@@ -47,10 +47,12 @@ def copy_file(get_file, set_file):
         shutil.copy2(get_file, set_file)
     except FileNotFoundError:
         logger.error(f'{get_file} has not been found')
-        input('Press <Enter> to return...')
+        logger.info('Press <Enter> to return...')
+        input()
     except IOError:
         logger.error(f'{get_file} has not been copied')
-        input('Press <Enter> to return...')
+        logger.info('Press <Enter> to return...')
+        input()
     else:
         logger.info(f'{get_file}\n       has been copied to the work dir as {set_file}')
         return True
@@ -65,10 +67,12 @@ def sign_compress(cmd, compress):
             logger.info(f'{compress} - OK')
         else:
             logger.error(f'{compress} - FAIL')
-            input('press <Enter> to return...')
+            logger.info('Press <Enter> to return...')
+            input()
     else:
         logger.error(f'{cmd} - FAIL')
-        input('Press <Enter> to return...')
+        logger.info('Press <Enter> to return...')
+        input()
 
 
 def db_way(config):

@@ -1,7 +1,6 @@
 import os
 import sys
 import json
-import msvcrt
 import logging
 from datetime import datetime
 from ips_creator import main_ips_creator
@@ -34,6 +33,11 @@ logger.addHandler(ch1)
 logger.addHandler(ch2)
 
 
+def end_print():
+    print('---------------------------------------')
+    print('---------------------------------------')
+
+
 def main():
     logger.debug('--- Main log has been started ---')
 
@@ -46,14 +50,13 @@ def main():
 
     while True:
         print("""
+            Main menu:
+            
         1 - Unpack report
         2 - Create IPS
         3 - Create statistics and activation
-        
         f - Find device by owner password
         r - Enter via unpacked report
-        
-        q - Quit
               """)
         choice = input('your choice: ').lower()
 
@@ -61,42 +64,39 @@ def main():
             logger.debug('<unpack-report> function has been started')
             main_find_uid(config)
             logger.debug('<unpack-report> has been finished')
-            print('----------------------------')
-            print('----------------------------')
+            end_print()
 
         elif choice == '2':
             logger.debug('<create-ips> function has been started')
             main_ips_creator()
             logger.debug('<create-ips> has been finished')
-            print('----------------------------')
-            print('----------------------------')
+            end_print()
 
         elif choice == '3':
             logger.debug('<activ-stat> function has been started')
             main_create_activstat()
             logger.debug('<activ-stat> has been finished')
-            print('----------------------------')
-            print('----------------------------')
+            end_print()
 
         elif choice == 'r':
             logger.debug('<reported-mod> has been started')
             main_find_uid_inner(config)
             logger.debug('<reported-mod> has been finished')
+            end_print()
 
         elif choice == 'f':
             logger.debug('<find password-mod> has been started')
-            print()
+            print('---------------------------------------\n')
             main_find_password(config)
             logger.debug('<find password-mod> has been finished')
-            print('----------------------------')
-            print('----------------------------')
+            end_print()
 
         elif choice == 'q':
             break
 
         else:
             logger.error('Incorrect input, try again')
-            print('----------------------------')
+            print('---------------------------------------')
 
     logger.debug('--- Main log has been stopped ---\n')
     sys.exit()

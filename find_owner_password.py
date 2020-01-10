@@ -30,10 +30,12 @@ def parse_cinema_xml(cinema, inp):
 def input_owner_password():
     while True:
         arg = input("enter owner password: ").strip()
+        print()
         if arg == "":
             return
         elif len(arg) != 5:
             logger.info("Owner password must have an 5 digits, try again..")
+            print()
             continue
         return arg
 
@@ -59,7 +61,8 @@ def main_find_password(config):
 
     if count == 0:
         logger.info(f"There is no owner password <{inp}> in database!")
-        input('Press <Enter> to return!')
+        logger.info('Press <Enter> to return...')
+        input()
 
     elif count == 1:
         choice = input("Press <Enter> to copy files to the work dir")
@@ -74,7 +77,8 @@ def main_find_password(config):
             go_path(found_path)
     else:
         logger.info('More than one owner password has been found in database!')
-        input('Press <Enter> to return!')
+        logger.info('Press <Enter> to return...')
+        input()
 
 
 

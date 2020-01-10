@@ -101,8 +101,11 @@ def walk_pth(pth):
 
 def main_find_uid_inner(config):
     if not os.path.exists('ReportDir'):
+        print()
         logger.error('<ReportDir> does not exist!')
-        logger.info('Make sure that SCC2Report.pak was unpacked at <ReportDir> directory!')
+        logger.info('Make sure that SCC2Report.pak was unpacked in <ReportDir>!')
+        logger.info('Press <Enter> to return...')
+        input()
         return
 
     paths_list = db_way(config)
@@ -125,9 +128,9 @@ def main_find_uid_inner(config):
         while True:
             print("""   
             <--     
-                1. Find UID in database
-                2. Analyze content
-                3. Main menu
+                1 - Find UID in database
+                2 - Analyze content
+                3 - Main menu
                       """)
             choice = input('your choice: ')
             if choice == '1':
@@ -267,8 +270,15 @@ def main_find_uid(config):
         except Exception as e:
             logger.error(e)
             logger.error('Rename the directory <Reportdir> and try again')
-            input('Press <Enter> to return...')
+            logger.info('Press <Enter> to return...')
+            input()
             return
+    if not os.path.exists('SCC2Report.pak'):
+        print()
+        logger.error('<SCC2Report.pak> was not found!')
+        logger.info('Press <Enter> to return...')
+        input()
+        return
     subprocess.run(r'Tools\unpack_report\start_unpack.bat')
     print()
     main_find_uid_inner(config)

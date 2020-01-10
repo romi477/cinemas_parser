@@ -102,15 +102,22 @@ def main_ips_creator():
     while True:
         print("""
         <-- 
-            1. Create IPS from Cinema-CinemaSettings in work dir
-            2. Create IPS from unpacked report & update "marker"
-            3. Main menu
+            1 - Create IPS from Cinema-CinemaSettings in work dir
+            2 - Create IPS from unpacked report & update "marker"
+            3 - Main menu
               """)
         choice = input('your choice: ')
         if choice == '1':
             subprocess.run(r'Tools\ips_creator\preautorun.bat')
             break
         elif choice == '2':
+            if not os.path.exists('ReportDir'):
+                print()
+                logger.error('<ReportDir> does not exist!')
+                logger.info('Make sure that SCC2Report.pak was unpacked in <ReportDir>!')
+                logger.info('Press <Enter> to return...')
+                input()
+                continue
             logger.warning('Make sure that right Cinema.xml has been copied to the work dir')
             print()
             inp = input('Press <Enter> to continue or <any_key + Enter> to go to the Main menu')
@@ -125,21 +132,25 @@ def main_ips_creator():
                     if copy_file(abs_path, 'CinemaSettings.xml'):
                         marker = get_marker(reporter_file)
                     else:
-                        input('Press <Enter> to return...')
+                        logger.info('Press <Enter> to return...')
+                        input()
                         return
                     if marker:
                         marker_seconds = get_seconds_from_marker(marker)
                         set_marker = set_tag_to_cinemasettings('D', 'M', marker_seconds)
                         if not set_marker:
-                            input('Press <Enter> to return...')
+                            logger.info('Press <Enter> to return...')
+                            input()
                             return
                         break
                     else:
-                        input('Press <Enter> to return...')
+                        logger.info('Press <Enter> to return...')
+                        input()
                         return
                 else:
                     logger.error('systeminfo.xmlb.xml or reporter.log not exists.')
-                    input('Press <Enter> to return...')
+                    logger.info('Press <Enter> to return...')
+                    input()
                     return
             else:
                 logger.info('The operation has been skipped')
@@ -148,7 +159,7 @@ def main_ips_creator():
             return
         else:
             logger.error('Incorrect input, try again')
-            print('----------------------------')
+            print('---------------------------------------')
 
     if os.path.exists('Cinema.xml') and os.path.exists('CinemaSettings.xml'):
         regdata_cmd = r'Tools\ips_creator\prepareRegData.bat'
@@ -161,8 +172,10 @@ def main_ips_creator():
             logger.info(f'IPS.exe for <{data_from_xmls["uid"]}> was created')
         else:
             logger.error('Data from xmls has not been taken')
-            input('Press <Enter> to return...')
+            logger.info('Press <Enter> to return...')
+            input()
     else:
         logger.error('There is no Cinema.xml or CinemaCinema.xml in work dir')
-        input('Press <Enter> to return...')
+        logger.info('Press <Enter> to return...')
+        input()
 

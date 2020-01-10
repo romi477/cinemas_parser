@@ -87,13 +87,18 @@ def main_create_activstat():
     while True:
         print("""
         <-- 
-            1. Create statistic for all xmls in <!Cinemas>
-            2. Create statistic & activation for Cinema.xml in work dir
-            3. Main menu
+            1 - Create statistic for all xmls in <!Cinemas>
+            2 - Create statistic & activation for Cinema.xml in work dir
+            3 - Main menu
               """)
         choice = input('your choice: ')
 
         if choice == '1':
+            if not os.path.exists('!Cinemas'):
+                logger.error('Directory <!Cinemas> not found')
+                logger.info('Press <Enter> to return...')
+                input()
+                break
             subprocess.run(r'Tools\activ_stat\preautorun.bat')
             print()
             paths_list = glob.iglob(r'!Cinemas\*\*\Cinema.xml')
@@ -105,11 +110,13 @@ def main_create_activstat():
                     break
                 else:
                     logger.warning('All xmls have been skipped')
-                    input('Press <Enter> to return...')
+                    logger.info('Press <Enter> to return...')
+                    input()
                     break
             else:
                 logger.error('There are no one xml in <!Cinemas>')
-                input('Press <Enter> to return...')
+                logger.info('Press <Enter> to return...')
+                input()
                 break
 
         elif choice == '2':
@@ -125,17 +132,19 @@ def main_create_activstat():
                     sign_compress(stat_cmd, compress_stat)
                     break
                 else:
-                    input('Press <Enter> to return...')
+                    logger.info('Press <Enter> to return...')
+                    input()
                     break
             else:
                 logger.error('There is no Cinema.xml in work dir')
-                input('Press <Enter> to return...')
+                logger.info('Press <Enter> to return...')
+                input()
                 break
 
         elif choice == '3':
             break
         else:
             logger.error('Incorrect input, try again')
-            print('----------------------------')
+            print('---------------------------------------')
 
 
