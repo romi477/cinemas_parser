@@ -4,6 +4,7 @@ import shutil
 import logging
 import subprocess
 from re import search
+from tqdm import tqdm
 from re import fullmatch
 
 
@@ -84,7 +85,7 @@ def db_way(config):
 def find_string_in_db(paths_list, a_string):
     logger.info(f'Finding "{a_string}" in database, please wait...')
     uid_list_from_db = []
-    for path in paths_list:
+    for path in tqdm(paths_list, ncols=74):
         with open(path, 'r') as file:
             read_obj = file.read()
         uid_tmp = search(a_string, read_obj)

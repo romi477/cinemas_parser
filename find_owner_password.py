@@ -3,6 +3,7 @@ import logging
 from xml.dom import minidom
 from utils import db_way, copy_file
 from utils import go_path
+from tqdm import tqdm
 
 
 logger = logging.getLogger('sccscript.findownerpassword')
@@ -50,13 +51,13 @@ def main_find_password(config):
     print()
     count = 0
     found_path = None
-    for path in paths_list:
+    for path in tqdm(paths_list, ncols=74):
         result = parse_cinema_xml(path, inp)
         if not result:
             continue
         else:
             key, found_path = result
-            print(f"{key}: {inp}\nPath: {os.path.abspath(found_path)}\n\n")
+            print(f"\n\n{key}: {inp}\nPath: {os.path.abspath(found_path)}\n\n")
             count += 1
 
     if count == 0:
